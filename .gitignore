@@ -2,3 +2,4 @@ peda-*
 build
 vgcore.*
 *vscode*
+deps
