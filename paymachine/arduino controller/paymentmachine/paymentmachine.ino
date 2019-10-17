@@ -19,50 +19,27 @@ OpenParkingManager - An open source parking manager and parking finder.
 #include <SoftwareSerial.h>
 #include <LiquidCrystal.h>
 #include <SD.h>
+#include <Wire.h>
 
 LiquidCrystal lcd(3, 2, 4, 5, 6, 7);
 
-File myFile;
-
-SoftwareSerial wifi_board(A4, A5);
-
-void send_bytes(const char* bytes)
-{
-  wifi_board.println(bytes);
-}
-
-void parse_message(const char* bytes)
-{
-  switch(bytes[0])
-  {
-    case 'p':
-    
-    break;
-    
-  };
-}
+int x = 0;
 
 void setup() {
   // put your setup code here, to run once:
   lcd.begin(16, 2);
   lcd.print("Hello, world");
-
-  wifi_board.begin(38400);
-  while(!wifi_board)
-  {
-  }
-  
+  Wire.begin();
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
+  delay(2000);
+  Wire.beginTransmission(8); // transmit to device #8
+  Wire.write("x is ");        // sends five bytes
+  Wire.write(x);              // sends one byte
+  Wire.endTransmission();    // stop transmitting
+  x++;
   lcd.setCursor(0 ,1);
-  lcd.print(millis() / 1000); 
-  if (wifi_board.available() > 0)
-  {
-    char buffer[64];
-    wifi_board.readBytesUntil('\n', &buffer, 64);
-    parse_message();
-  }
-  
+  lcd.print(x); 
 }
