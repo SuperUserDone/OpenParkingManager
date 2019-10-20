@@ -1,8 +1,25 @@
+/*
+OpenParkingManager - An open source parking manager and parking finder.
+    Copyright (C) 2019 Louis van der Walt
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or 
+    any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 #include <opencv2/opencv.hpp>
 #include <tesseract/baseapi.h>
 
-#include <iostream>
-#include <vector>
+#include "ReadLicensePlates.hpp"
 
 bool compareContourAreas ( std::vector<cv::Point> contour1, std::vector<cv::Point> contour2 ) {
     double i = fabs( contourArea(cv::Mat(contour1)) );
@@ -60,15 +77,20 @@ std::string read_plate(int camera_number)
     cv::Mat final_image;
     bitwise_and(frame, frame, final_image, mask);
 
-    cv::RotatedRect licence_plate_rect = minAreaRect(license_plate);
+    cv::RotatedRect license_plate_rect = minAreaRect(license_plate);
 
-    //cv::rectangle(final_image, licence_plate_rect.boundingRect(), cv::Scalar(255,0,0));
+    //cv::rectangle(final_image, license_plate_rect.boundingRect(), cv::Scalar(255,0,0));
 
-    cv::Mat cropped_image = final_image(licence_plate_rect.boundingRect());
+    cv::Mat rot_mat = cv::getRotationMatrix2D(license_plate_rect.center, license_plate_rect.angle, 1);
+
+    cv::warpAffine(final_image, final_image, rot_mat, final_image.size(), cv::INTER_CUBIC);
+
+    license_plate_rect.angle = 0;
+    cv::Mat cropped_image = final_image(license_plate_rect.boundingRect());
 
     cv::cvtColor(cropped_image, cropped_image, cv::COLOR_BGR2GRAY);
 
-    cv::threshold(cropped_image, cropped_image, 148, 255, cv::THRESH_BINARY);
+    cv::threshold(cropped_image, cropped_image, 164, 255, cv::THRESH_BINARY);
 
     tesseract::TessBaseAPI tess;
     if (tess.Init(NULL, "eng")) {
@@ -83,5 +105,6 @@ std::string read_plate(int camera_number)
         if( cv::waitKey(10) == 27 ) break;
         cv::imshow("Test", cropped_image);
     }
+
     return tess.GetUTF8Text();
 }

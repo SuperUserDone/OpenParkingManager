@@ -16,30 +16,10 @@ OpenParkingManager - An open source parking manager and parking finder.
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#pragma once
+
+#include <string>
 #include <iostream>
-#include "ReadLicensePlates.hpp"
+#include <vector>
 
-// #include <cppgpio.hpp>
-
-uint64_t get_ticket(std::string license)
-{
-
-}
-
-void write_ticket(uint64_t num)
-{
-
-}
-
-int main()
-{
-   /*  GPIO::DigitalIn button(17, GPIO::GPIO_PULL::UP);
-    while(true)
-    {
-        button.triggered();
-        if(button.get_state())
-            std::cout << "pushed" << std::endl;
-    } */
-    std::cout << read_plate(0) << std::endl;
-    return 0;
-}
+std::string read_plate(int camera_number);

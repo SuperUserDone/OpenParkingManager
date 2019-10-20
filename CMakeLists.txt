@@ -15,7 +15,7 @@ endif()
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBUV REQUIRED libuv)
 
-include_directories(${CMAKE_SOURCE_DIR}/common/include/)
+include_directories("${CMAKE_SOURCE_DIR}/common/include/")
 include_directories(${CMAKE_SOURCE_DIR}/deps/include/)
 include_directories(${LIBUV_INCLUDE_DIRS})
 
