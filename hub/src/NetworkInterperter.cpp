@@ -51,6 +51,10 @@ void NetworkInterperter::init()
         fprintf(stderr, "Listen error %s\n", uv_strerror(r));
         return;
     }
+    m_system->store_vehicle("VC45TKGP", 69420);
+    m_system->store_vehicle("MTC836FS", 42069);
+    m_system->store_parking("MTC836FS", "1B4");
+    //m_system->destroy_ticket(1234);
 }
 
 void NetworkInterperter::start()

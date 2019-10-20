@@ -19,19 +19,24 @@
 #include <sqlite3.h>
 #include <string>
 #include <stdint.h>
+#include <map>
 
 class Database
 {
 private:
     sqlite3 *m_db;
+    std::map<std::string, std::string> m_query_results;
+    bool m_query_results_available = false;
 public:
     Database();
     ~Database();
     
     std::string get_parking_by_ticket(uint64_t ticket);
 
-    void store_parking(std::string licence, std::string parking);
-    void delete_parking(std::string parking);
+    void store_vehicle(std::string license, uint64_t ticket);
+    void store_parking(std::string license, std::string parking);
     void destroy_ticket(uint64_t ticket);
-    void query(std::string query);
+    std::map<std::string, std::string> query(std::string query);
+
+    int callback(void *NotUsed, int argc, char **argv, char **azColName);
 };
