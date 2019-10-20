@@ -15,10 +15,11 @@ This project is an attempt to create a free and open source system to find your 
 - Entry
 - Tracking
 - Payment (Representation)
+- SQL database
 
 Some features we plan to implement:
 - Mobile Application
-- SQL or other database
+- Management Application
 
 **Currently this project is not fit for use in a real world scenario.**
 
