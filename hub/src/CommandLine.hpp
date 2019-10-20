@@ -20,7 +20,7 @@
 #include <iostream>
 #include <uv.h>
 
-#include "CoreSystem.hpp"
+#include "Database.hpp"
 #include "IBaseSystem.hpp"
 #include "CommandLine_uvWrap.hpp"
 
@@ -28,7 +28,7 @@ class CommandLine : public IBaseSystem
 {
 public:
 	CommandLine();
-	CommandLine(CoreSystem* system);
+	CommandLine(Database* system);
 	//	Init functions
 	void init() override;
 	void start() override;
@@ -44,8 +44,8 @@ public:
 	void read_stdin(uv_stream_t *stream, ssize_t nread, const uv_buf_t *buf);
 
 	//	System related
-	void set_system_ptr(CoreSystem* system);
-	CoreSystem* get_system_ptr();
+	void set_system_ptr(Database* system);
+	Database* get_system_ptr();
 private:
 	// 	Processing
 	void process_text(std::string text);
@@ -59,5 +59,5 @@ private:
 	uv_pipe_t stdout_pipe;
 	uv_pipe_t stdin_pipe;
 	//	System
-	CoreSystem* m_system;
+	Database* m_system;
 };

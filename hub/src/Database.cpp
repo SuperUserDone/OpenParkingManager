@@ -16,14 +16,40 @@
 */
 #include "Database.hpp"
 
+static int callback(void *NotUsed, int argc, char **argv, char **azColName)
+{
+    for(int i=0; i<argc; i++)
+    {
+        printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+    }
+    printf("\n");
+    return 0;
+}
+
 Database::Database()
 {
-    char *zErrMsg = 0;
     int rc;
+    rc = sqlite3_open("parking.db", &m_db);
+    if(rc)
+    {
+        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(m_db));
+        sqlite3_close(m_db);
+        return;
+    }
 }
 
 Database::~Database()
 {
+    sqlite3_close(m_db);
 }
 
-Database::
+void Database::query(std::string query)
+{
+    char *zErrMsg = 0;
+    int rc;
+    rc = sqlite3_exec(m_db, query.c_str(), callback, 0, &zErrMsg);
+    if( rc!=SQLITE_OK ){
+      fprintf(stderr, "SQL error: %s\n", zErrMsg);
+      sqlite3_free(zErrMsg);
+    }
+}

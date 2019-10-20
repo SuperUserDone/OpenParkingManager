@@ -22,7 +22,6 @@
 #include <string>
 #include <uv.h>
 
-#include "CoreSystem.hpp"
 #include "IBaseSystem.hpp"
 #include "CommandLine.hpp"
 #include "NetworkInterperter.hpp"

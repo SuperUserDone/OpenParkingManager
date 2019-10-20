@@ -23,10 +23,10 @@ using namespace std::placeholders;
 NetworkInterperter::NetworkInterperter()
 {
     if(m_system == nullptr)
-        m_system = new CoreSystem();
+        m_system = new Database();
 }
 
-NetworkInterperter::NetworkInterperter(CoreSystem* system)
+NetworkInterperter::NetworkInterperter(Database* system)
 {
     m_system = system;
 }
@@ -91,7 +91,9 @@ void NetworkInterperter::echo_read(uv_stream_t *client, ssize_t nread, const uv_
     if (nread > 0) {
         write_req_t *req = (write_req_t*) malloc(sizeof(write_req_t));
         req->buf = uv_buf_init(buf->base, nread);
-        uv_write((uv_write_t*) req, client, &req->buf, 1, echo_write_uv);
+        //uv_write((uv_write_t*) req, client, &req->buf, 1, echo_write_uv);
+        parse_packet(std::string(req->buf.base));
+        echo_write((uv_write_t*) req, 0);
         return;
     }
     if (nread < 0) {

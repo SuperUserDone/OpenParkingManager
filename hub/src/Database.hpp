@@ -14,32 +14,24 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+#pragma once
 
-#include "CoreSystem.hpp"
-#include "Utils.hpp"
+#include <sqlite3.h>
+#include <string>
+#include <stdint.h>
 
-bool CoreSystem::init()
+class Database
 {
-	return true;
-}
-parking_space_t CoreSystem::get_parking(uint64_t ticket_number)
-{
-	return m_parking_data[m_ticket_data[ticket_number]];
-}
-uint64_t CoreSystem::issue_ticket(std::string reg_number)
-{
-	uint8_t* bytes = gen_random_bytes(8);
-	uint64_t ticket = *(uint64_t*) bytes;
-	free(bytes);
-	m_ticket_data.emplace(ticket, reg_number);
-	return ticket;
-}
-void CoreSystem::set_parking(std::string reg_number, parking_space_t place)
-{
-	m_parking_data[reg_number] = place;
-}
-void CoreSystem::destroy_ticket(uint64_t ticket_number)
-{
-	m_parking_data.erase(m_ticket_data[ticket_number]);
-	m_ticket_data.erase(ticket_number);
-}
+private:
+    sqlite3 *m_db;
+public:
+    Database();
+    ~Database();
+    
+    std::string get_parking_by_ticket(uint64_t ticket);
+
+    void store_parking(std::string licence, std::string parking);
+    void delete_parking(std::string parking);
+    void destroy_ticket(uint64_t ticket);
+    void query(std::string query);
+};

@@ -21,7 +21,6 @@
 #include <uv.h>
 #include <cstring>
 
-#include "CoreSystem.hpp"
 #include "Utils.hpp"
 
 class IBaseSystem

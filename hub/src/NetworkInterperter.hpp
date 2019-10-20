@@ -18,13 +18,13 @@
 #pragma once
 
 #include "IBaseSystem.hpp"
-#include "CoreSystem.hpp"
+#include "Database.hpp"
 
 class NetworkInterperter : public IBaseSystem
 {
 public:
     NetworkInterperter();
-    NetworkInterperter(CoreSystem* system);
+    NetworkInterperter(Database* system);
 
     //	Init functions
 	void init() override;
@@ -40,9 +40,11 @@ public:
     void echo_read(uv_stream_t *client, ssize_t nread, const uv_buf_t *buf);
     void on_new_connection(uv_stream_t *server, int status);
 
+    // PacketParser
+    void parse_packet(std::string packet);
 private:
     //  System
-    CoreSystem* m_system;
+    Database* m_system;
     //  Socket
     struct sockaddr_in addr;
     uv_tcp_t m_server;

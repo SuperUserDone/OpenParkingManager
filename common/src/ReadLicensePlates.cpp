@@ -90,7 +90,7 @@ std::string read_plate(int camera_number)
 
     cv::cvtColor(cropped_image, cropped_image, cv::COLOR_BGR2GRAY);
 
-    cv::threshold(cropped_image, cropped_image, 164, 255, cv::THRESH_BINARY);
+    cv::threshold(cropped_image, cropped_image, 148, 255, cv::THRESH_BINARY);
 
     tesseract::TessBaseAPI tess;
     if (tess.Init(NULL, "eng")) {
@@ -105,6 +105,13 @@ std::string read_plate(int camera_number)
         if( cv::waitKey(10) == 27 ) break;
         cv::imshow("Test", cropped_image);
     }
+    std::string license_plate_text = tess.GetUTF8Text();
+    size_t pos = license_plate_text.find(' ');
+    while(pos != std::string::npos)
+    {
+        license_plate_text.erase(pos, 1);
+        pos = license_plate_text.find(' ');
+    }
 
-    return tess.GetUTF8Text();
+    return license_plate_text;
 }

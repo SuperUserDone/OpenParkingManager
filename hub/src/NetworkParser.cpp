@@ -1,5 +1,5 @@
 /*
-    OpenParkingManager - An open source parking manager and parking finder.
+    OpenParkingManager- An open source parking manager and parking finder.
     Copyright (C) 2019 Louis van der Walt
 
     This program is free software: you can redistribute it and/or modify
@@ -14,30 +14,22 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
-#pragma once
-
+#include "NetworkInterperter.hpp"
 #include <iostream>
-#include <string>
-#include <stdint.h>
-#include <map>
+#include <fstream>
 
-typedef struct
+void NetworkInterperter::parse_packet(std::string packet)
 {
-	uint8_t floor;
-	uint8_t row;
-	uint8_t parking;
-} parking_space_t;
-
-class CoreSystem
-{
-public:
-	bool init();
-	parking_space_t get_parking(uint64_t ticket_number);
-	uint64_t issue_ticket(std::string reg_number);
-	void set_parking(std::string regNumber, parking_space_t place);
-	void destroy_ticket(uint64_t ticket_number);
-private:
-	std::map<std::string, parking_space_t> m_parking_data;
-	std::map<uint64_t, std::string> m_ticket_data;
-};
+    std::cout << packet;
+    std::string optcode(packet.begin(), packet.begin()+2);
+    std::cout << optcode << std::endl;
+    switch (hash(optcode.c_str()))
+    {
+    case hash("IT"):
+        
+        break;
+    
+    default:
+        break;
+    }
+}

@@ -19,16 +19,16 @@
 #include <iostream>
 
 #include "CommandLine.hpp"
+#include "Database.hpp"
 
 using namespace std::placeholders;
 
 CommandLine::CommandLine()
 {
-    if(m_system == nullptr)
-        m_system = new CoreSystem();
+    CommandLine(new Database());
 }
 
-CommandLine::CommandLine(CoreSystem* system)
+CommandLine::CommandLine(Database* system)
 {
     m_system = system;
 }
@@ -118,12 +118,12 @@ void CommandLine::read_stdin(uv_stream_t *stream, ssize_t nread, const uv_buf_t 
 	write(">", 1);
 }
 
-void CommandLine::set_system_ptr(CoreSystem* system)
+void CommandLine::set_system_ptr(Database* system)
 {
 	m_system = system;
 }
 
-CoreSystem* CommandLine::get_system_ptr()
+Database* CommandLine::get_system_ptr()
 {
 	return m_system;
 }
