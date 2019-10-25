@@ -21,7 +21,6 @@
 #include <functional>
 using namespace std::placeholders;
 
-
 std::function<int(void*, int, char**, char**)> callback_cpp;
 
 int callback_c(void *NotUsed, int argc, char **argv, char **azColName)
