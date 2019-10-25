@@ -4,7 +4,7 @@ OpenParkingManager - An open source parking manager and parking finder.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or 
+    the Free Software Foundation, either version 3 of the License, or
     any later version.
 
     This program is distributed in the hope that it will be useful,
@@ -21,10 +21,30 @@ OpenParkingManager - An open source parking manager and parking finder.
 
 #include "ReadLicensePlates.hpp"
 
+std::string valid_chars = "BCDFGHJKMNPRSTVWZ23456789\0";
+
 bool compareContourAreas ( std::vector<cv::Point> contour1, std::vector<cv::Point> contour2 ) {
     double i = fabs( contourArea(cv::Mat(contour1)) );
     double j = fabs( contourArea(cv::Mat(contour2)) );
     return ( i < j );
+}
+
+std::string sanatise(std::string text)
+{
+    std::string final = "";
+    for(char ti: text)
+    {
+        for(char it: valid_chars)
+        {
+            if(it == ti)
+            {
+                final.push_back(it);
+            }
+        }
+    }
+    if(final.length() < 7)
+        final = "";
+    return final;
 }
 
 std::string read_plate(int camera_number, rectangle crop)
@@ -44,7 +64,7 @@ std::string read_plate(int camera_number, rectangle crop)
         ROI.width = crop.width;
     if(crop.height <= frame.size().height)
         ROI.height = crop.height;
-    //frame = frame(ROI);
+    frame = frame(ROI);
 
     cv::Mat grey;
     cv::cvtColor(frame, grey, cv::COLOR_BGR2GRAY);
@@ -58,6 +78,11 @@ std::string read_plate(int camera_number, rectangle crop)
     std::vector<std::vector<cv::Point>> contours;
     cv::findContours(edges, contours, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
 
+    if(!contours.size())
+        return "";
+
+    std::cout << contours.size() << std::endl;;
+
     std::sort(contours.begin(), contours.end(), compareContourAreas);
 
     std::reverse(contours.begin(), contours.end());
@@ -66,43 +91,65 @@ std::string read_plate(int camera_number, rectangle crop)
 
     for(std::vector<cv::Point> vec : contours)
     {
-        double perimiter = cv::arcLength(vec, true);
-        std::vector<cv::Point> approx_poligon;
-        cv::approxPolyDP(vec, approx_poligon, 0.018 * perimiter, true);
-        if(approx_poligon.size() == 4)
+        if(fabs(cv::contourArea(vec)) > 20000)
         {
-            license_plate = approx_poligon;
-            std::cout << "Found!!!" << std::endl;
-            break;
+            double perimiter = cv::arcLength(vec, true);
+            std::vector<cv::Point> approx_poligon;
+            cv::approxPolyDP(vec, approx_poligon, 0.018 * perimiter, true);
+            if(approx_poligon.size() == 4)
+            {
+                license_plate = approx_poligon;
+                std::cout << "Found!!!" << std::endl;
+                break;
+            }
         }
     }
 
-    //cv::drawContours(frame, std::vector<std::vector<cv::Point>>{license_plate}, -1, cv::Scalar(255,255,0),5);
+    if(!license_plate.size())
+    {
+        if(contours[0].size() > 2)
+            license_plate = contours[0];
+        else
+            return "";
+    }
+
+    cv::drawContours(frame, std::vector<std::vector<cv::Point>> {license_plate}, -1, cv::Scalar(255,255,255),5);
 
     cv::Mat mask(frame.size(), CV_8UC1);
     mask = 0;
-    cv::fillPoly(mask, std::vector<std::vector<cv::Point>>{license_plate}, cv::Scalar(255), 8, 0);
+    cv::fillPoly(mask, std::vector<std::vector<cv::Point>> {license_plate}, cv::Scalar(255), 8, 0);
 
     cv::Mat final_image;
     cv::bitwise_and(frame, frame, final_image, mask);
     cv::bitwise_not(mask, mask);
     cv::bitwise_or(cv::Scalar(255, 255, 255), final_image, final_image, mask);
 
-    cv::RotatedRect license_plate_rect = minAreaRect(license_plate);
+    cv::cvtColor(final_image, final_image, cv::COLOR_BGR2GRAY);
+    cv::threshold(final_image, final_image, 148, 255, cv::THRESH_BINARY);
+    cv::bitwise_not(final_image, final_image);
 
-    //cv::rectangle(final_image, license_plate_rect.boundingRect(), cv::Scalar(255,0,0));
+    std::vector<cv::Point> points;
+    cv::Mat_<uchar>::iterator it = final_image.begin<uchar>();
+    cv::Mat_<uchar>::iterator end = final_image.end<uchar>();
+    for (; it != end; ++it)
+        if (*it)
+            points.push_back(it.pos());
 
-    cv::Mat rot_mat = cv::getRotationMatrix2D(license_plate_rect.center, license_plate_rect.angle, 1);
+    if(points.size() < 3)
+        return "";
+
+    cv::RotatedRect box = cv::minAreaRect(cv::Mat(points));
+
+    double angle = box.angle;
+
+    if (angle < -45)
+	    angle = (90 + angle);
+
+    cv::Mat rot_mat = cv::getRotationMatrix2D(box.center, angle, 1);
 
     cv::warpAffine(final_image, final_image, rot_mat, final_image.size(), cv::INTER_CUBIC);
-    
-    cv::Size box_size = license_plate_rect.size;
-    cv::Mat cropped_image;
-    cv::getRectSubPix(final_image, box_size, license_plate_rect.center, cropped_image);
 
-    cv::cvtColor(cropped_image, cropped_image, cv::COLOR_BGR2GRAY);
-
-    cv::threshold(cropped_image, cropped_image, 148, 255, cv::THRESH_BINARY);
+    cv::Mat cropped_image = final_image;
 
     tesseract::TessBaseAPI tess;
     if (tess.Init(NULL, "eng")) {
@@ -116,16 +163,11 @@ std::string read_plate(int camera_number, rectangle crop)
     while(1)
     {
         if( cv::waitKey(10) == 27 ) break;
-        cv::imshow("Test", cropped_image);
-    }
-    */
+        cv::imshow("Img", final_image);
+    }*/
+
     std::string license_plate_text = tess.GetUTF8Text();
-    size_t pos = license_plate_text.find(' ');
-    while(pos != std::string::npos)
-    {
-        license_plate_text.erase(pos, 1);
-        pos = license_plate_text.find(' ');
-    }
+    license_plate_text = sanatise(license_plate_text);
 
     return license_plate_text;
 }
