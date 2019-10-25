@@ -22,4 +22,19 @@ OpenParkingManager - An open source parking manager and parking finder.
 #include <iostream>
 #include <vector>
 
-std::string read_plate(int camera_number);
+struct rectangle 
+{
+    int x;
+    int y;
+    int width;
+    int height;
+    rectangle(int ix, int iy, int iwidth, int iheight)
+    {
+        x = ix;
+        y = iy;
+        width = iwidth;
+        height = iheight;
+    }
+};
+
+std::string read_plate(int camera_number, rectangle crop);

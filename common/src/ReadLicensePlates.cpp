@@ -27,21 +27,30 @@ bool compareContourAreas ( std::vector<cv::Point> contour1, std::vector<cv::Poin
     return ( i < j );
 }
 
-std::string read_plate(int camera_number)
+std::string read_plate(int camera_number, rectangle crop)
 {
     cv::VideoCapture cap;
-    // open the default camera, use something different from 0 otherwise;
-    // Check VideoCapture documentation.
     if(!cap.open(camera_number))
         return "";
     cv::Mat frame;
     cap >> frame;
 
+    cv::Rect ROI;
+    ROI.x = crop.x;
+    ROI.y = crop.y;
+    ROI.width = frame.size().width-1;
+    ROI.width = frame.size().height-1;
+    if(crop.width <= frame.size().width)
+        ROI.width = crop.width;
+    if(crop.height <= frame.size().height)
+        ROI.height = crop.height;
+    //frame = frame(ROI);
+
     cv::Mat grey;
     cv::cvtColor(frame, grey, cv::COLOR_BGR2GRAY);
 
     cv::Mat blur;
-    cv::bilateralFilter(grey, blur, 11, 17, 17);
+    cv::bilateralFilter(grey, blur, 14, 17, 17);
 
     cv::Mat edges;
     cv::Canny(blur, edges, 30, 200);
@@ -68,14 +77,16 @@ std::string read_plate(int camera_number)
         }
     }
 
-    //cv::drawContours(frame, std::vector<std::vector<cv::Point>>{license_plate},-1,cv::Scalar(255,0,0),3);
+    //cv::drawContours(frame, std::vector<std::vector<cv::Point>>{license_plate}, -1, cv::Scalar(255,255,0),5);
 
     cv::Mat mask(frame.size(), CV_8UC1);
     mask = 0;
     cv::fillPoly(mask, std::vector<std::vector<cv::Point>>{license_plate}, cv::Scalar(255), 8, 0);
 
     cv::Mat final_image;
-    bitwise_and(frame, frame, final_image, mask);
+    cv::bitwise_and(frame, frame, final_image, mask);
+    cv::bitwise_not(mask, mask);
+    cv::bitwise_or(cv::Scalar(255, 255, 255), final_image, final_image, mask);
 
     cv::RotatedRect license_plate_rect = minAreaRect(license_plate);
 
@@ -84,9 +95,10 @@ std::string read_plate(int camera_number)
     cv::Mat rot_mat = cv::getRotationMatrix2D(license_plate_rect.center, license_plate_rect.angle, 1);
 
     cv::warpAffine(final_image, final_image, rot_mat, final_image.size(), cv::INTER_CUBIC);
-
-    license_plate_rect.angle = 0;
-    cv::Mat cropped_image = final_image(license_plate_rect.boundingRect());
+    
+    cv::Size box_size = license_plate_rect.size;
+    cv::Mat cropped_image;
+    cv::getRectSubPix(final_image, box_size, license_plate_rect.center, cropped_image);
 
     cv::cvtColor(cropped_image, cropped_image, cv::COLOR_BGR2GRAY);
 
@@ -100,11 +112,13 @@ std::string read_plate(int camera_number)
     tess.SetImage((uchar*)cropped_image.data, cropped_image.size().width, cropped_image.size().height, cropped_image.channels(), cropped_image.step1());
     tess.Recognize(0);
 
+    /*
     while(1)
     {
         if( cv::waitKey(10) == 27 ) break;
         cv::imshow("Test", cropped_image);
     }
+    */
     std::string license_plate_text = tess.GetUTF8Text();
     size_t pos = license_plate_text.find(' ');
     while(pos != std::string::npos)
