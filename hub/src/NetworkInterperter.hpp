@@ -40,8 +40,11 @@ public:
     void echo_read(uv_stream_t *client, ssize_t nread, const uv_buf_t *buf);
     void on_new_connection(uv_stream_t *server, int status);
 
+    // System Functions
+    uint64_t issue_ticket();
+
     // PacketParser
-    void parse_packet(std::string packet);
+    std::string parse_packet(std::string packet);
 private:
     //  System
     Database* m_system;

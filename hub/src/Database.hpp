@@ -35,6 +35,7 @@ public:
 
     void store_vehicle(std::string license, uint64_t ticket);
     void store_parking(std::string license, std::string parking);
+    void remove_parking(std::string parking);
     void destroy_ticket(uint64_t ticket);
     std::map<std::string, std::string> query(std::string query);
 

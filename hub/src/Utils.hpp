@@ -18,6 +18,7 @@
 #pragma once
 
 #include <uv.h>
+#include <ctime>
 #include <random>
 
 typedef struct {
@@ -27,7 +28,7 @@ typedef struct {
 
 inline uint8_t* gen_random_bytes(int bytes_count)
 {
-	srand(time(nullptr));
+	srand(time(nullptr)+std::clock());
 	uint8_t* bytes;
 	bytes = (uint8_t*) malloc(sizeof(uint8_t) * bytes_count);
 	for(int i = 0; i < bytes_count; i++)

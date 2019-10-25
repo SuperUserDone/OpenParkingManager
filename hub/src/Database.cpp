@@ -64,12 +64,19 @@ std::map<std::string, std::string> Database::query(std::string query)
     char *zErrMsg = 0;
     int rc;
     rc = sqlite3_exec(m_db, query.c_str(), callback_c, 0, &zErrMsg);
-    if( rc!=SQLITE_OK ){
-      fprintf(stderr, "SQL error: %s\n", zErrMsg);
-      sqlite3_free(zErrMsg);
+    if( rc!=SQLITE_OK ) {
+        fprintf(stderr, "SQL error: %s\n", zErrMsg);
+        sqlite3_free(zErrMsg);
     }
     std::cout << query << std::endl;
     return m_query_results;
+}
+
+void Database::remove_parking(std::string parking)
+{
+    std::stringstream querys;
+    querys << "UPDATE Parking0 SET Parking = CAST(NULL AS STRING) WHERE Parking = '" << parking << "'";
+    query(querys.str());
 }
 
 std::string Database::get_parking_by_ticket(uint64_t ticket)
@@ -94,6 +101,7 @@ void Database::store_vehicle(std::string license, uint64_t ticket)
 void Database::store_parking(std::string license, std::string parking)
 {
     std::stringstream querys;
+    remove_parking(parking);
     querys << "UPDATE Parking0 SET Parking = '" << parking << "' WHERE License = '" << license << "'";
     query(querys.str());
 }

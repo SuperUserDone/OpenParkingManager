@@ -51,9 +51,6 @@ void NetworkInterperter::init()
         fprintf(stderr, "Listen error %s\n", uv_strerror(r));
         return;
     }
-    m_system->store_vehicle("VC45TKGP", 69420);
-    m_system->store_vehicle("MTC836FS", 42069);
-    m_system->store_parking("MTC836FS", "1B4");
     //m_system->destroy_ticket(1234);
 }
 
@@ -71,8 +68,8 @@ void NetworkInterperter::write(const char* data, int len)
 
 void NetworkInterperter::free_write_req(uv_write_t *req) {
     write_req_t *wr = (write_req_t*) req;
-    free(wr->buf.base);
-    free(wr);
+    //free(wr->buf.base);
+    //free(wr);
 }
 
 void NetworkInterperter::alloc_buffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf) {
@@ -94,9 +91,10 @@ void NetworkInterperter::echo_write(uv_write_t *req, int status) {
 void NetworkInterperter::echo_read(uv_stream_t *client, ssize_t nread, const uv_buf_t *buf) {
     if (nread > 0) {
         write_req_t *req = (write_req_t*) malloc(sizeof(write_req_t));
-        req->buf = uv_buf_init(buf->base, nread);
-        //uv_write((uv_write_t*) req, client, &req->buf, 1, echo_write_uv);
-        parse_packet(std::string(req->buf.base));
+        std::string response = parse_packet(std::string(buf->base, nread));
+        response.append("\n");
+        req->buf = uv_buf_init((char*)response.c_str(), response.size());
+        uv_write((uv_write_t*) req, client, &req->buf, 1, echo_write_uv);
         echo_write((uv_write_t*) req, 0);
         return;
     }
@@ -124,5 +122,10 @@ void NetworkInterperter::on_new_connection(uv_stream_t *server, int status) {
     else {
         uv_close((uv_handle_t*) client, on_close_uv);
     }
+}
+
+uint64_t NetworkInterperter::issue_ticket()
+{
+    return *(uint64_t*) gen_random_bytes(8);
 }
 

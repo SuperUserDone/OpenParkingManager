@@ -18,18 +18,41 @@
 #include <iostream>
 #include <fstream>
 
-void NetworkInterperter::parse_packet(std::string packet)
+std::string NetworkInterperter::parse_packet(std::string packet)
 {
     std::cout << packet;
     std::string optcode(packet.begin(), packet.begin()+2);
     std::cout << optcode << std::endl;
+    packet.erase(packet.begin(), packet.begin()+2);
+    packet.erase(packet.end()-1, packet.end());
+    std::cout << packet << std::endl;;
     switch (hash(optcode.c_str()))
     {
-    case hash("IT"):
-        
-        break;
-    
+    case hash("IT"): // Issue ticket
+    {
+        uint64_t num = issue_ticket();
+        m_system->store_vehicle(packet, num);
+        return std::to_string(num);
+    }
+    break;
+    case hash("PP"): // Put Parking into database
+    {
+        m_system->store_parking(std::string(packet.begin()+5, packet.end()), std::string(packet.begin(), packet.begin()+5));
+        return "OK";
+    }
+    break;
+    case hash("LT"): // Locate ticket
+    {
+        return m_system->get_parking_by_ticket(atoi(packet.c_str()));
+    }
+    case hash("RP"):
+    {
+        m_system->remove_parking(packet);
+        return "OK";
+    }
+    break;
     default:
+        return "ER";
         break;
     }
 }
