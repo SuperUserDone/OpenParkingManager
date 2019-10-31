@@ -47,6 +47,21 @@ std::string sanatise(std::string text)
     return final;
 }
 
+std::string OCR(cv::Mat in)
+{
+    tesseract::TessBaseAPI tess;
+    if (tess.Init(NULL, "eng")) {
+        fprintf(stderr, "Could not initialize tesseract.\n");
+        exit(1);
+    }
+    tess.SetImage((uchar*)in.data, in.size().width, in.size().height, in.channels(), in.step1());
+    tess.Recognize(0);
+
+    std::string license_plate_text = tess.GetUTF8Text();
+    license_plate_text = sanatise(license_plate_text);
+}
+
+
 std::string read_plate(int camera_number, rectangle crop)
 {
     cv::VideoCapture cap;
@@ -54,26 +69,33 @@ std::string read_plate(int camera_number, rectangle crop)
         return "";
     cv::Mat frame;
     cap >> frame;
+    
+    cv::imwrite("out_frame.png",frame);
 
     cv::Rect ROI;
     ROI.x = crop.x;
     ROI.y = crop.y;
-    ROI.width = frame.size().width-1;
-    ROI.width = frame.size().height-1;
-    if(crop.width <= frame.size().width)
-        ROI.width = crop.width;
-    if(crop.height <= frame.size().height)
-        ROI.height = crop.height;
+    ROI.width = crop.width;
+    ROI.height = crop.height;
+    if(crop.width == 0)
+        ROI.width = frame.size().height;
+    if(crop.height == 0)
+        ROI.height = frame.size().height;
     frame = frame(ROI);
+
+    cv::imwrite("out_frame_cropped.png",frame);
 
     cv::Mat grey;
     cv::cvtColor(frame, grey, cv::COLOR_BGR2GRAY);
+    cv::imwrite("out_grey.png", grey);
 
     cv::Mat blur;
     cv::bilateralFilter(grey, blur, 14, 17, 17);
+    cv::imwrite("out_blur.png", blur);
 
     cv::Mat edges;
     cv::Canny(blur, edges, 30, 200);
+    cv::imwrite("out_edges.png", edges);
 
     std::vector<std::vector<cv::Point>> contours;
     cv::findContours(edges, contours, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
@@ -118,11 +140,13 @@ std::string read_plate(int camera_number, rectangle crop)
     cv::Mat mask(frame.size(), CV_8UC1);
     mask = 0;
     cv::fillPoly(mask, std::vector<std::vector<cv::Point>> {license_plate}, cv::Scalar(255), 8, 0);
+    cv::imwrite("out_mask.png", mask);
 
     cv::Mat final_image;
     cv::bitwise_and(frame, frame, final_image, mask);
     cv::bitwise_not(mask, mask);
     cv::bitwise_or(cv::Scalar(255, 255, 255), final_image, final_image, mask);
+    cv::imwrite("final_image.png", mask);
 
     cv::cvtColor(final_image, final_image, cv::COLOR_BGR2GRAY);
     cv::threshold(final_image, final_image, 148, 255, cv::THRESH_BINARY);
@@ -143,7 +167,7 @@ std::string read_plate(int camera_number, rectangle crop)
     double angle = box.angle;
 
     if (angle < -45)
-	    angle = (90 + angle);
+        angle = (90 + angle);
 
     cv::Mat rot_mat = cv::getRotationMatrix2D(box.center, angle, 1);
 

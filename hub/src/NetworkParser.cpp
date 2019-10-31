@@ -43,7 +43,7 @@ std::string NetworkInterperter::parse_packet(std::string packet)
     break;
     case hash("LT"): // Locate ticket
     {
-        return m_system->get_parking_by_ticket(atoi(packet.c_str()));
+        return m_system->get_parking_by_ticket(atoi_64(packet.c_str()));
     }
     case hash("RP"):
     {

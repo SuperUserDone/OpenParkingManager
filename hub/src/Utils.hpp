@@ -19,12 +19,22 @@
 
 #include <uv.h>
 #include <ctime>
+#include <sstream>
 #include <random>
 
 typedef struct {
     uv_write_t req;
     uv_buf_t buf;
 } write_req_t;
+
+inline uint64_t atoi_64(const char* str)
+{
+    uint64_t val;
+    std::istringstream ss(str);
+    if (!(ss >> val))
+        std::cout << "failed" << std::endl;
+    return val;
+}
 
 inline uint8_t* gen_random_bytes(int bytes_count)
 {
