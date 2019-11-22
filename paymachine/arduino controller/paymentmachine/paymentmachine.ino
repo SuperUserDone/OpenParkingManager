@@ -27,6 +27,10 @@ File myFile;
 
 bool demo = false;
 
+char* parkings[] = {"Floor 4 Pos A6", "Floor 4 Pos B4", "Floor 4 Pos B7", "Floor 4 Pos B1"};
+
+int posi = 0;
+
 void setup() {
 
   // put your setup code here, to run once:
@@ -98,7 +102,7 @@ void loop() {
     lcd.clear();
     lcd.print("You parked at:");
     lcd.setCursor(0, 1);
-    lcd.print("Floor 4 pos A6");
+    lcd.print(parkings[posi++ % 4]);
   }
   delay(5000);
 
