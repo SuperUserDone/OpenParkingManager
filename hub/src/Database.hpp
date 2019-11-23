@@ -17,8 +17,9 @@
 #pragma once
 
 #include <sqlite3.h>
-#include <string>
 #include <stdint.h>
+#include <string>
+#include <mutex>
 #include <map>
 
 class Database
@@ -27,17 +28,28 @@ private:
     sqlite3 *m_db;
     std::map<std::string, std::string> m_query_results;
     bool m_query_results_available = false;
+
+    std::mutex m_query_lock;
+
 public:
     Database();
     ~Database();
-    
+
+    Database(Database const&) = delete;
+    void operator=(Database const&) = delete;
+
     std::string get_parking_by_ticket(uint64_t ticket);
 
-    void store_vehicle(std::string license, uint64_t ticket);
-    void store_parking(std::string license, std::string parking);
-    void remove_parking(std::string parking);
+    void store_vehicle(const std::string& license, uint64_t ticket);
+    void store_parking(const std::string& license, const std::string& parking);
+    void remove_parking(const std::string& parking);
     void destroy_ticket(uint64_t ticket);
-    std::map<std::string, std::string> query(std::string query);
+    std::map<std::string, std::string> query(const std::string& query);
 
     int callback(void *NotUsed, int argc, char **argv, char **azColName);
+    static Database& getInstance()
+    {
+        static Database instance;
+        return instance;
+    }
 };

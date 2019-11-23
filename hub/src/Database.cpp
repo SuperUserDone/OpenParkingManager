@@ -58,8 +58,9 @@ Database::~Database()
     sqlite3_close(m_db);
 }
 
-std::map<std::string, std::string> Database::query(std::string query)
+std::map<std::string, std::string> Database::query(const std::string& query)
 {
+    m_query_lock.lock();
     char *zErrMsg = 0;
     int rc;
     rc = sqlite3_exec(m_db, query.c_str(), callback_c, 0, &zErrMsg);
@@ -68,10 +69,12 @@ std::map<std::string, std::string> Database::query(std::string query)
         sqlite3_free(zErrMsg);
     }
     std::cout << query << std::endl;
-    return m_query_results;
+    std::map<std::string, std::string> results = m_query_results;
+    m_query_lock.unlock();
+    return results;
 }
 
-void Database::remove_parking(std::string parking)
+void Database::remove_parking(const std::string& parking)
 {
     std::stringstream querys;
     querys << "UPDATE Parking0 SET Parking = CAST(NULL AS STRING) WHERE Parking = '" << parking << "'";
@@ -82,10 +85,11 @@ std::string Database::get_parking_by_ticket(uint64_t ticket)
 {
     std::stringstream querys;
     querys << "SELECT Parking FROM Parking0 WHERE Ticket = " << ticket;
-    return query(querys.str())["Parking"];
+    std::string parking = query(querys.str())["Parking"];
+    return parking;
 }
 
-void Database::store_vehicle(std::string license, uint64_t ticket)
+void Database::store_vehicle(const std::string& license, uint64_t ticket)
 {
     std::stringstream querys;
     querys << "DELETE FROM Parking0 WHERE License = '" << license << "'";
@@ -97,7 +101,7 @@ void Database::store_vehicle(std::string license, uint64_t ticket)
     query(querys.str());
 }
 
-void Database::store_parking(std::string license, std::string parking)
+void Database::store_parking(const std::string& license, const std::string& parking)
 {
     std::stringstream querys;
     remove_parking(parking);
