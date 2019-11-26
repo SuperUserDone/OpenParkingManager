@@ -14,12 +14,12 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#include "networking/Address.hpp"
 
-Address::Address(/* args */)
+class PacketListener
 {
-}
-
-Address::~Address()
-{
-}
+private:
+    /* data */
+public:
+    PacketListener(/* args */);
+    ~PacketListener();
+};

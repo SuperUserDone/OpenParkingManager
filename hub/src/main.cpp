@@ -17,12 +17,13 @@
 
 #include <iostream>
 
-#include "Manager.hpp"
+#include <networking/Socket.hpp>
 
-int main()
+int main(void)
 {
-	Manager man;
-	man.init();
-	man.run();
-	return 0;
+    Socket sock("127.0.0.1", "6969");
+    sock.connect_socket();
+    sock.send_data("YAY\n");
+    std::cout << (char*) sock.receive_data() << std::endl;
+    return 0;
 }
