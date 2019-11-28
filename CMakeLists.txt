@@ -8,6 +8,10 @@ set(BUILD_TARGET_COMMON true CACHE BOOL "Build the common libs Required for Hub 
 set(BUILD_TARGET_GATE_ENTRY false CACHE BOOL "Build the entry system")
 set(BUILD_TARGET_NODE false CACHE BOOL "Build the node")
 
+if (NOT EXISTS ${CMAKE_SOURCE_DIR}/deps/include/sigs.h)
+    file(DOWNLOAD https://raw.githubusercontent.com/netromdk/sigs/master/sigs.h ${CMAKE_SOURCE_DIR}/deps/include/sigs.h)
+endif()
+
 if (NOT EXISTS ${CMAKE_SOURCE_DIR}/deps/include/json.hpp)
     file(DOWNLOAD https://github.com/nlohmann/json/releases/download/v3.7.0/json.hpp ${CMAKE_SOURCE_DIR}/deps/include/json.hpp)
 endif()
