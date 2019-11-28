@@ -14,6 +14,8 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+#pragma once
+
 #include <iostream>
 #include <string>
 
@@ -29,6 +31,7 @@
 
 #include <arpa/inet.h>
 
+#include "networking/Packet.hpp"
 
 class Socket
 {
@@ -48,13 +51,15 @@ public:
 
     void set_address(const std::string &address);
     void set_port(const std::string &port);
+    void set_connection_fd(int fd);
 
     std::string get_address();
     std::string get_port();
 
-    bool send_data(const uint8_t* data);
-    bool send_data(const char* data);
-    uint8_t* receive_data(int max_size = 131072);
+    bool send_data(const std::string &data);
+    bool send_data(Packet data);
+    std::string receive_data(int max_size = 1024);
+
 
     void disconnect();
 

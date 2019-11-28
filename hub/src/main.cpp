@@ -18,12 +18,14 @@
 #include <iostream>
 
 #include <networking/Socket.hpp>
+#include <networking/Packet.hpp>
 
 int main(void)
 {
     Socket sock("127.0.0.1", "6969");
     sock.connect_socket();
-    sock.send_data("YAY\n");
-    std::cout << (char*) sock.receive_data() << std::endl;
+    Packet data("ABCDEFGHIJK", 8);
+    sock.send_data(data);
+    std::cout << sock.receive_data() << std::endl;
     return 0;
 }

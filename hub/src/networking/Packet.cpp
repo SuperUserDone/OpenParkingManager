@@ -16,9 +16,67 @@
 */
 #include <networking/Packet.hpp>
 
-
 Packet::Packet(/* args */)
 {
+}
+
+Packet::Packet(const std::string &data, int maxsize)
+    : m_maxsize(maxsize)
+    , m_data(data)
+{
+}
+
+int Packet::get_data_size()
+{
+    return m_data.length();
+}
+
+int Packet::get_chunck_count()
+{
+    bool offset = 0;
+    if(get_data_size() % m_maxsize > 0)
+        offset = 1;
+    return (get_data_size() / m_maxsize) + offset;
+}
+
+int Packet::get_maxsize()
+{
+    return m_maxsize;
+}
+
+std::string Packet::get_meta_package()
+{
+    std::stringstream package;
+    package << "MP\n"
+            << std::to_string(m_maxsize) << "\n"
+            << get_chunck_count() << "\n"
+            << get_data_size() << "\n\0";
+    return package.str();
+}
+
+std::string Packet::get_data_chunck(int index)
+{
+    if (get_chunck_count() >= index) {
+        std::string chunck = "";
+
+        int chunck_start = index * m_maxsize;
+
+        chunck = m_data.substr( chunck_start, m_maxsize);
+
+        return chunck;
+    } else {
+        return "\n";
+    }
+}
+
+void Packet::set_data(const std::string &data)
+{
+    m_data = data;
+}
+
+void Packet::set_max_size(int maxsize)
+{
+    m_maxsize = maxsize;
 }
 
 Packet::~Packet()

@@ -14,11 +14,37 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+#pragma once 
+
+#include <stdint.h>
+#include <cstdlib>
+#include <cmath>
+#include <string.h>
+#include <iostream>
+#include <sstream>
+
 class Packet
 {
 private:
-    /* data */
+    std::string m_data;
+
+    int m_maxsize;
+
+    int m_chunck_count = 0;
 public:
-    Packet(/* args */);
+    Packet();
+    Packet(const std::string &data, int maxsize = 1024);
+
+    std::string get_data_chunck(int index);
+
+    int get_chunck_count();
+    int get_maxsize();
+    int get_data_size();
+
+    std::string get_meta_package();
+
+    void set_data(const std::string &data);
+    void set_max_size(int maxsize);
+
     ~Packet();
 };
