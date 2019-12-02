@@ -23,6 +23,7 @@
 #include <iostream>
 #include <sstream>
 
+namespace LouisNet {
 class Packet
 {
 private:
@@ -48,3 +49,4 @@ public:
 
     ~Packet();
 };
+} // namespace LouisNet

@@ -17,10 +17,9 @@
 
 #include <iostream>
 
-#include <networking/AsyncSocket.hpp>
-#include <networking/Listener.hpp>
-#include <networking/Packet.hpp>
-#include <networking/Socket.hpp>
+#include "networking/LouisNet.hpp"
+
+using namespace LouisNet;
 
 static void connect_signals(Socket* sock)
 {

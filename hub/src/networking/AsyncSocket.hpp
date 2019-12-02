@@ -16,13 +16,14 @@
 */
 #pragma once
 
-#include <thread>
 #include <atomic>
 #include <future>
+#include <thread>
 
-#include "networking/Socket.hpp"
 #include "SimpleSignal.h"
+#include "networking/Socket.hpp"
 
+namespace LouisNet {
 class AsyncSocket {
 private:
     std::thread m_recive_async_thread;
@@ -32,13 +33,14 @@ private:
 public:
     AsyncSocket();
     explicit AsyncSocket(Socket* sock);
-    
+
     Socket* get_socket();
     void setSocket(Socket* sock);
-    
+
     void receive_async();
     void start();
     void kill();
 
     ~AsyncSocket();
 };
+} // namespace LouisNet

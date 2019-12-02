@@ -16,6 +16,7 @@
 */
 #include "networking/Socket.hpp"
 
+namespace LouisNet {
 Socket::Socket()
 {
 }
@@ -181,3 +182,4 @@ Socket::~Socket()
 {
     disconnect();
 }
+} // namespace LouisNet

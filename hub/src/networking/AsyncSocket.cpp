@@ -16,6 +16,7 @@
 */
 #include "networking/AsyncSocket.hpp"
 
+namespace LouisNet {
 AsyncSocket::AsyncSocket(/* args */)
 {
 }
@@ -62,3 +63,4 @@ AsyncSocket::~AsyncSocket()
 {
     kill();
 }
+} // namespace LouisNet

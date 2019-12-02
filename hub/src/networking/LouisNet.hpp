@@ -14,14 +14,11 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#include "networking/PacketListener.hpp"
+#pragma once
 
-namespace LouisNet {
-PacketListener::PacketListener(/* args */)
-{
-}
+#include "AsyncSocket.hpp"
+#include "Listener.hpp"
+#include "Packet.hpp"
+#include "PacketListener.hpp"
+#include "Socket.hpp"
 
-PacketListener::~PacketListener()
-{
-}
-} // namespace LouisNet

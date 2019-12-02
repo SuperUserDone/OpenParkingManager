@@ -36,6 +36,7 @@
 #include "networking/AsyncSocket.hpp"
 #include "networking/Socket.hpp"
 
+namespace LouisNet {
 class Listener {
 private:
     std::vector<AsyncSocket*> m_sockets;
@@ -68,3 +69,4 @@ public:
 
     ~Listener();
 };
+} // namespace LouisNet

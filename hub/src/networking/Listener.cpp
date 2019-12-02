@@ -17,6 +17,8 @@
 
 #include <networking/Listener.hpp>
 
+
+namespace LouisNet {
 Listener::Listener(const std::string& port)
     : m_port(port)
 {
@@ -143,3 +145,4 @@ void Listener::clean_connections()
 Listener::~Listener()
 {
 }
+} // namespace LouisNet

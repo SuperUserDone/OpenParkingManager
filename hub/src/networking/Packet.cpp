@@ -16,11 +16,12 @@
 */
 #include <networking/Packet.hpp>
 
+namespace LouisNet {
 Packet::Packet(/* args */)
 {
 }
 
-Packet::Packet(const std::string &data, int maxsize)
+Packet::Packet(const std::string& data, int maxsize)
     : m_maxsize(maxsize)
     , m_data(data)
 {
@@ -34,7 +35,7 @@ int Packet::get_data_size()
 int Packet::get_chunck_count()
 {
     bool offset = 0;
-    if(get_data_size() % m_maxsize > 0)
+    if (get_data_size() % m_maxsize > 0)
         offset = 1;
     return (get_data_size() / m_maxsize) + offset;
 }
@@ -61,7 +62,7 @@ std::string Packet::get_data_chunck(int index)
 
         int chunck_start = index * m_maxsize;
 
-        chunck = m_data.substr( chunck_start, m_maxsize);
+        chunck = m_data.substr(chunck_start, m_maxsize);
 
         return chunck;
     } else {
@@ -69,7 +70,7 @@ std::string Packet::get_data_chunck(int index)
     }
 }
 
-void Packet::set_data(const std::string &data)
+void Packet::set_data(const std::string& data)
 {
     m_data = data;
 }
@@ -82,3 +83,4 @@ void Packet::set_max_size(int maxsize)
 Packet::~Packet()
 {
 }
+} // namespace LouisNet
