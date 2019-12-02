@@ -22,7 +22,7 @@
 #include <networking/Packet.hpp>
 #include <networking/Socket.hpp>
 
-void connect_signals(Socket* sock)
+static void connect_signals(Socket* sock)
 {
     sock->signal.on_connect.connect([](Socket* s, const std::string& addr, const std::string& port, const int& fd) {
         std::cout << "Connected to " << addr << ":" << port << " with FD: " << fd << "!" << std::endl;
@@ -41,14 +41,14 @@ void connect_signals(Socket* sock)
 }
 int main(void)
 {
-    Listener l("6969");
+    Listener lis("6969");
 
-    l.signal.on_accept.connect([](Listener* l, AsyncSocket* s) {
-        connect_signals(s->getSocket());
-        std::cout << "Got connection!" << std::endl;
+    lis.signal.on_accept.connect([](Listener* l, AsyncSocket* s) {
+        connect_signals(s->get_socket());
+        std::cout << "Got connection from " << s->get_socket()->get_address() << ":" << s->get_socket()->get_port() << std::endl;
     });
 
-    l.listen_async();
+    lis.listen_async();
 
     while (true) {
         /* code */

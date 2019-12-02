@@ -24,7 +24,7 @@ AsyncSocket::AsyncSocket(Socket* sock)
     m_sock = sock;
 }
 
-Socket* AsyncSocket::getSocket()
+Socket* AsyncSocket::get_socket()
 {
     return m_sock;
 }
@@ -51,10 +51,10 @@ void AsyncSocket::start()
 void AsyncSocket::kill()
 {
     if (m_sock != nullptr) {
-        if (m_sock->is_connected()) {
+        if (m_sock->is_connected())
             m_sock->disconnect();
-            m_recive_async_thread.join();
-        }
+        m_recive_async_thread.join();
+        m_recive_async_thread.detach();
     }
 }
 

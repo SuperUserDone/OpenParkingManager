@@ -85,6 +85,7 @@ void Socket::set_connection_fd(int fd)
 {
     m_socket_fd = fd;
     m_connected = true;
+    signal.on_connect.emit(this, m_address, m_port, m_socket_fd);
 }
 
 std::string Socket::get_address()
@@ -135,9 +136,8 @@ bool Socket::send_data(const std::string& data)
 std::string Socket::receive_data(int max_size, bool wait)
 {
     if (m_connected) {
-        int numbytes = 0;
+        ssize_t numbytes = 0;
         char* buf = (char*)malloc(sizeof(char) * max_size);
-        std::this_thread::sleep_for(std::chrono::seconds(1));
         if ((numbytes = recv(m_socket_fd, buf, max_size - 1, wait ? 0 : MSG_DONTWAIT)) == -1) {
             if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
                 free(buf);
@@ -148,7 +148,6 @@ std::string Socket::receive_data(int max_size, bool wait)
                 free(buf);
                 return "";
             }
-            return "";
         }
         std::string data = "";
         if (numbytes > 0) {

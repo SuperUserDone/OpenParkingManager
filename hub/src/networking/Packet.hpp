@@ -33,7 +33,7 @@ private:
     int m_chunck_count = 0;
 public:
     Packet();
-    Packet(const std::string &data, int maxsize = 1024);
+    explicit Packet(const std::string &data, int maxsize = 1024);
 
     std::string get_data_chunck(int index);
 

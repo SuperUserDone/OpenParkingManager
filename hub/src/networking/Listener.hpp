@@ -44,12 +44,14 @@ private:
 
     void listen_worker();
 
-    AsyncSocket* add_connection(int fd);
+    AsyncSocket* add_connection(int fd, const std::string &address, const std::string &port);
     void clean_connections();
 
     int m_sock_fd;
 
-    std::atomic_bool m_listening = false;
+    std::atomic_bool m_listening;
+
+    std::string m_port;
 
 public:
     Listener(const std::string& port);

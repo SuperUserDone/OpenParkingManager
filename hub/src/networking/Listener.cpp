@@ -18,9 +18,10 @@
 #include <networking/Listener.hpp>
 
 Listener::Listener(const std::string& port)
+    : m_port(port)
 {
+    m_listening = false;
     struct addrinfo hints, *servinfo, *p;
-    struct sigaction sa;
     int yes = 1;
     int rv;
 
@@ -96,14 +97,22 @@ void Listener::listen_worker()
             perror("accept");
             continue;
         }
-        signal.on_accept.emit(this, add_connection(new_fd));
+
+        struct sockaddr* their_addr_conv = (struct sockaddr*)&their_addr;
+        char s[INET6_ADDRSTRLEN];
+        inet_ntop(their_addr.ss_family,
+            their_addr_conv->sa_family ? (void*)&(((struct sockaddr_in*)their_addr_conv)->sin_addr) : (void*)&(((struct sockaddr_in6*)their_addr_conv)->sin6_addr),
+            s, sizeof s);
+        signal.on_accept.emit(this, add_connection(new_fd, std::string(s), m_port));
     }
 }
 
-AsyncSocket* Listener::add_connection(int fd)
+AsyncSocket* Listener::add_connection(int fd, const std::string& address, const std::string& port)
 {
     Socket* socket = new Socket();
     socket->set_connection_fd(fd);
+    socket->set_address(address);
+    socket->set_port(port);
     AsyncSocket* asocket = new AsyncSocket(socket);
     asocket->start();
     m_sockets.push_back(asocket);
@@ -114,7 +123,7 @@ std::vector<Socket*> Listener::get_sockets()
 {
     std::vector<Socket*> sockets;
     for (auto a : m_sockets) {
-        sockets.push_back(a->getSocket());
+        sockets.push_back(a->get_socket());
     }
     return sockets;
 }
@@ -122,7 +131,8 @@ std::vector<Socket*> Listener::get_sockets()
 void Listener::clean_connections()
 {
     for (int i = 0; i < m_sockets.size(); i++) {
-        if (!m_sockets[i]->getSocket()->is_connected()) {
+        if (!m_sockets[i]->get_socket()->is_connected()) {
+            delete m_sockets[i];
             m_sockets.erase(m_sockets.begin() + i);
             clean_connections();
             return;

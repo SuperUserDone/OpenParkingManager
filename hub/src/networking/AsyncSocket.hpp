@@ -31,9 +31,9 @@ private:
 
 public:
     AsyncSocket();
-    AsyncSocket(Socket* sock);
+    explicit AsyncSocket(Socket* sock);
     
-    Socket* getSocket();
+    Socket* get_socket();
     void setSocket(Socket* sock);
     
     void receive_async();
