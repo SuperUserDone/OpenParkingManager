@@ -14,13 +14,55 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+#pragma once
 
+#include <string>
+#include <thread>
+#include <vector>
 
-class Listener
-{
+#include <arpa/inet.h>
+#include <errno.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
+#include "networking/AsyncSocket.hpp"
+#include "networking/Socket.hpp"
+
+class Listener {
 private:
-    /* data */
+    std::vector<AsyncSocket*> m_sockets;
+
+    std::thread m_listener_worker_thread;
+
+    void listen_worker();
+
+    AsyncSocket* add_connection(int fd);
+    void clean_connections();
+
+    int m_sock_fd;
+
+    std::atomic_bool m_listening = false;
+
 public:
-    Listener(/* args */);
+    Listener(const std::string& port);
+
+    void start();
+    void listen_async();
+    void stop();
+
+    std::vector<Socket*> get_sockets();
+
+    struct {
+        Simple::Signal<void(Listener*, AsyncSocket*)> on_accept;
+    } signal;
+
     ~Listener();
 };

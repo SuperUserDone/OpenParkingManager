@@ -21,13 +21,13 @@
 #include <future>
 
 #include "networking/Socket.hpp"
-#include "sigs.h"
+#include "SimpleSignal.h"
 
 class AsyncSocket {
 private:
     std::thread m_recive_async_thread;
 
-    Socket* m_sock;
+    Socket* m_sock = nullptr;
 
 public:
     AsyncSocket();

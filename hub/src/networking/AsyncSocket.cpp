@@ -50,12 +50,15 @@ void AsyncSocket::start()
 
 void AsyncSocket::kill()
 {
-    if (m_sock->is_connected()) {
-        m_sock->disconnect();
-        m_recive_async_thread.join();
+    if (m_sock != nullptr) {
+        if (m_sock->is_connected()) {
+            m_sock->disconnect();
+            m_recive_async_thread.join();
+        }
     }
 }
 
 AsyncSocket::~AsyncSocket()
 {
+    kill();
 }

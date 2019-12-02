@@ -17,31 +17,42 @@
 
 #include <iostream>
 
+#include <networking/AsyncSocket.hpp>
+#include <networking/Listener.hpp>
 #include <networking/Packet.hpp>
 #include <networking/Socket.hpp>
-#include <networking/AsyncSocket.hpp>
 
-int main(void)
+void connect_signals(Socket* sock)
 {
-    Socket sock("127.0.0.1", "6969");
-    sock.signal.on_connect.connect([](Socket* s, const std::string& addr, const std::string& port, const int& fd) {
+    sock->signal.on_connect.connect([](Socket* s, const std::string& addr, const std::string& port, const int& fd) {
         std::cout << "Connected to " << addr << ":" << port << " with FD: " << fd << "!" << std::endl;
     });
-    sock.signal.on_packet_send.connect([](Socket* s, const std::string& packet){
-        std::cout << "Sent: \n" << packet << "\nto " << s->get_address() << ":" << s->get_port() << "!" << std::endl;
+    sock->signal.on_packet_send.connect([](Socket* s, const std::string& packet) {
+        std::cout << "Sent: \n"
+                  << packet << "\nto " << s->get_address() << ":" << s->get_port() << "!" << std::endl;
     });
-    sock.signal.on_packet_receive.connect([](Socket* s, const std::string& packet){
-        std::cout << "Recieved:\n" << packet << "\nfrom " << s->get_address() << ":" << s->get_port() << "!" << std::endl;
+    sock->signal.on_packet_receive.connect([](Socket* s, const std::string& packet) {
+        std::cout << "Recieved:\n"
+                  << packet << "\nfrom " << s->get_address() << ":" << s->get_port() << "!" << std::endl;
     });
-    sock.signal.on_disconnect.connect([](Socket* s){
+    sock->signal.on_disconnect.connect([](Socket* s) {
         std::cout << "Socket disconnected!" << std::endl;
     });
-    sock.connect_socket();
-    AsyncSocket asock(&sock);
-    asock.start();
-    Packet data("ABCDEFGHIJK", 16);
-    asock.getSocket()->check_connected();
-    asock.getSocket()->send_data(data);
-    asock.kill();
+}
+int main(void)
+{
+    Listener l("6969");
+
+    l.signal.on_accept.connect([](Listener* l, AsyncSocket* s) {
+        connect_signals(s->getSocket());
+        std::cout << "Got connection!" << std::endl;
+    });
+
+    l.listen_async();
+
+    while (true) {
+        /* code */
+    }
+
     return 0;
 }

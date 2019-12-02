@@ -66,7 +66,7 @@ bool Socket::connect_socket()
     }
 
     freeaddrinfo(servinfo);
-    signal.on_connect(this, m_address, m_port, m_socket_fd);
+    signal.on_connect.emit(this, m_address, m_port, m_socket_fd);
     m_connected = true;
     return true;
 }
@@ -84,7 +84,6 @@ void Socket::set_port(const std::string& port)
 void Socket::set_connection_fd(int fd)
 {
     m_socket_fd = fd;
-    check_connected();
     m_connected = true;
 }
 
@@ -125,7 +124,7 @@ bool Socket::send_data(const std::string& data)
             disconnect();
             return false;
         }
-        signal.on_packet_send(this, data);
+        signal.on_packet_send.emit(this, data);
         return true;
     } else {
         std::cout << "Socket: Not connected" << std::endl;
@@ -137,44 +136,32 @@ std::string Socket::receive_data(int max_size, bool wait)
 {
     if (m_connected) {
         int numbytes = 0;
-        char* buf = new char[max_size];
-        if (wait) {
-            if ((numbytes = recv(m_socket_fd, buf, max_size - 1, MSG_WAITFORONE)) == -1) {
+        char* buf = (char*)malloc(sizeof(char) * max_size);
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        if ((numbytes = recv(m_socket_fd, buf, max_size - 1, wait ? 0 : MSG_DONTWAIT)) == -1) {
+            if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
+                free(buf);
+                return "";
+            } else {
                 perror("recv");
                 disconnect();
+                free(buf);
                 return "";
             }
-        } else {
-            if ((numbytes = recv(m_socket_fd, buf, max_size - 1, MSG_DONTWAIT)) == -1) {
-                if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
-                    return "";
-                } else {
-                    perror("recv");
-                    disconnect();
-                    return "";
-                }
-            }
+            return "";
         }
-        buf[numbytes] = '\0';
-        signal.on_packet_receive(this, std::string(buf));
-        return std::string(buf);
+        std::string data = "";
+        if (numbytes > 0) {
+            buf[numbytes] = '\0';
+            data = std::string(buf);
+            signal.on_packet_receive.emit(this, data);
+        }
+        free(buf);
+        return data;
     } else {
         std::cout << "Socket: Not connected" << std::endl;
         return "";
     }
-}
-
-bool Socket::check_connected()
-{
-    if (!send_data("CC")) {
-        disconnect();
-        return false;
-    }
-    if (receive_data() != "CC") {
-        disconnect();
-        return false;
-    }
-    return true;
 }
 
 bool Socket::is_connected()
@@ -187,7 +174,7 @@ void Socket::disconnect()
     close(m_socket_fd);
     if (m_connected) {
         m_connected = false;
-        signal.on_disconnect(this);
+        signal.on_disconnect.emit(this);
     }
 }
 

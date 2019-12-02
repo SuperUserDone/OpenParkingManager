@@ -19,6 +19,7 @@
 #include <iostream>
 #include <string>
 #include <atomic>
+#include <thread>
 
 #include <errno.h>
 #include <netdb.h>
@@ -35,14 +36,14 @@
 
 #include "networking/Packet.hpp"
 
-#include "sigs.h"
+#include "SimpleSignal.h"
 
 class Socket {
 protected:
     std::string m_address;
     std::string m_port;
 
-    int m_socket_fd = 0;
+    std::atomic_int m_socket_fd = 0;
     std::atomic_bool m_connected = false;
 public:
     Socket();
@@ -60,17 +61,15 @@ public:
     bool send_data(const std::string& data);
     bool send_data(Packet data);
     std::string receive_data(int max_size = 1024, bool wait = true);
-
-    bool check_connected();
     bool is_connected();
 
     void disconnect();
 
     struct {
-        sigs::Signal<void(Socket*, const std::string&, const std::string&, const int&)> on_connect;
-        sigs::Signal<void(Socket*, const std::string&)> on_packet_receive;
-        sigs::Signal<void(Socket*, const std::string&)> on_packet_send;
-        sigs::Signal<void(Socket*)> on_disconnect;
+        Simple::Signal<void(Socket*, const std::string&, const std::string&, const int&)> on_connect;
+        Simple::Signal<void(Socket*, const std::string&)> on_packet_receive;
+        Simple::Signal<void(Socket*, const std::string&)> on_packet_send;
+        Simple::Signal<void(Socket*)> on_disconnect;
     } signal;
 
     ~Socket();
