@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.0.0)
 
-FILE(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/hub/src/*.cpp ${PROJECT_SOURCE_DIR}/hub/src/networking/*.cpp)
+FILE(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/hub/src/*.cpp ${PROJECT_SOURCE_DIR}/hub/src/LouisNet/*.cpp)
 
 pkg_check_modules(SQLITE REQUIRED sqlite3)
 
-include_directories(${PROJECT_SOURCE_DIR}/hub/src/)
+include_directories(${PROJECT_SOURCE_DIR}/hub/src/ ${PROJECT_SOURCE_DIR}/hub/src/LouisNet)
 
 add_executable(OpenParkingManagerHub ${SRC_FILES})
 

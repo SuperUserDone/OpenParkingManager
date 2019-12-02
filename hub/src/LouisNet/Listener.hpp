@@ -33,8 +33,8 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#include "networking/AsyncSocket.hpp"
-#include "networking/Socket.hpp"
+#include "AsyncSocket.hpp"
+#include "Socket.hpp"
 
 namespace LouisNet {
 class Listener {

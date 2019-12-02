@@ -21,7 +21,7 @@
 #include <thread>
 
 #include "SimpleSignal.h"
-#include "networking/Socket.hpp"
+#include "Socket.hpp"
 
 namespace LouisNet {
 class AsyncSocket {

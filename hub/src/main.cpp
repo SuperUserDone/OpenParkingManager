@@ -17,7 +17,7 @@
 
 #include <iostream>
 
-#include "networking/LouisNet.hpp"
+#include "LouisNet/LouisNet.hpp"
 
 using namespace LouisNet;
 

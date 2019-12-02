@@ -34,10 +34,10 @@
 
 #include <arpa/inet.h>
 
-#include "networking/Packet.hpp"
+#include "Packet.hpp"
 
 #include "SimpleSignal.h"
-
+namespace LouisNet {
 class Socket {
 protected:
     std::string m_address;
@@ -74,3 +74,4 @@ public:
 
     ~Socket();
 };
+} // namespace LouisNet

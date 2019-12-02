@@ -14,7 +14,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#include <networking/Packet.hpp>
+#include <Packet.hpp>
 
 namespace LouisNet {
 Packet::Packet(/* args */)
