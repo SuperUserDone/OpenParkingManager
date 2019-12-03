@@ -19,9 +19,29 @@
 namespace LouisNet {
 PacketListener::PacketListener(/* args */)
 {
+    Socket::on_packet_receive.connect(std::bind(&PacketListener::handler, this, std::placeholders::_1, std::placeholders::_2));
 }
 
-PacketListener::~PacketListener()
+PacketListener::PacketListener(const std::string& regex)
 {
+    set_regex(regex);
+    Socket::on_packet_receive.connect(std::bind(&PacketListener::handler, this, std::placeholders::_1, std::placeholders::_2));
+}
+
+void PacketListener::handler(Socket* sock, const std::string& data)
+{
+    if (std::regex_match(data, std::regex(m_regex_string))) {
+        m_run(sock, data);
+    }
+}
+
+void PacketListener::set_regex(const std::string& regex)
+{
+    m_regex_string = regex;
+}
+
+void PacketListener::set_run_function(std::function<void(Socket* sock, const std::string& data)> func)
+{
+    m_run = func;
 }
 } // namespace LouisNet

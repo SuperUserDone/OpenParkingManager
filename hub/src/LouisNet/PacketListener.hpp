@@ -16,13 +16,24 @@
 */
 #pragma once 
 
+#include "LouisNet.hpp"
+
+#include <regex>
+
 namespace LouisNet {
 class PacketListener
 {
-private:
-    /* data */
+protected:
+    std::function<void(Socket* sock, const std::string &data)> m_run;
+
+    std::string m_regex_string;
 public:
-    PacketListener(/* args */);
-    ~PacketListener();
+    PacketListener();
+    PacketListener(const std::string &regex);
+
+    void handler(Socket* sock, const std::string &data);
+    void set_regex(const std::string &regex);
+
+    void set_run_function(std::function<void(Socket* sock, const std::string &data)> func);
 };
 } // namespace LouisNet

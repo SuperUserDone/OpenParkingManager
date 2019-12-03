@@ -21,30 +21,42 @@
 
 using namespace LouisNet;
 
-static void connect_signals(Socket* sock)
+static void connect_signals()
 {
-    sock->signal.on_connect.connect([](Socket* s, const std::string& addr, const std::string& port, const int& fd) {
-        std::cout << "Connected to " << addr << ":" << port << " with FD: " << fd << "!" << std::endl;
+    Socket::on_connect.connect([](Socket* s, const std::string& addr, const std::string& port, const int& fd) {
+        std::cout << "\33[32mConnected to " << addr << ":" << port << " with FD: " << fd << "!\33[0m" << std::endl;
     });
-    sock->signal.on_packet_send.connect([](Socket* s, const std::string& packet) {
+    Socket::on_packet_send.connect([](Socket* s, const std::string& packet) {
         std::cout << "Sent: \n"
                   << packet << "\nto " << s->get_address() << ":" << s->get_port() << "!" << std::endl;
     });
-    sock->signal.on_packet_receive.connect([](Socket* s, const std::string& packet) {
+    Socket::on_packet_receive.connect([](Socket* s, const std::string& packet) {
         std::cout << "Recieved:\n"
                   << packet << "\nfrom " << s->get_address() << ":" << s->get_port() << "!" << std::endl;
     });
-    sock->signal.on_disconnect.connect([](Socket* s) {
+    Socket::on_disconnect.connect([](Socket* s) {
         std::cout << "Socket disconnected!" << std::endl;
     });
 }
+
+static void test(Socket* s, const std::string& packet)
+{
+    std::cout << "got large_packet_listener!" << std::endl;
+}
+
 int main(void)
 {
+    PacketListener large_packet_listener("MP\n\\d+\n\\d+\n\\d+\n");
+    PacketListener large_packet_listener2("OK");
+    large_packet_listener2.set_run_function(test);
+    large_packet_listener.set_run_function(test);
+    connect_signals();
     Listener lis("6969");
 
-    lis.signal.on_accept.connect([](Listener* l, AsyncSocket* s) {
-        connect_signals(s->get_socket());
-        std::cout << "Got connection from " << s->get_socket()->get_address() << ":" << s->get_socket()->get_port() << std::endl;
+    Listener::on_accept.connect([](Listener* l, AsyncSocket* s) {
+        std::cout << "\33[34mGot connection from " << s->get_socket()->get_address() << ":" << s->get_socket()->get_port() << "\33[0m" << std::endl;
+        Packet test_packet("000000000000000000000", 16);
+        s->get_socket()->send_data(test_packet);
     });
 
     lis.listen_async();
