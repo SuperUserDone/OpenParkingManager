@@ -9,7 +9,7 @@ set(BUILD_TARGET_GATE_ENTRY false CACHE BOOL "Build the entry system")
 set(BUILD_TARGET_NODE false CACHE BOOL "Build the node")
 
 if (NOT EXISTS ${CMAKE_SOURCE_DIR}/deps/include/SimpleSignal.h)
-    file(DOWNLOAD https://raw.githubusercontent.com/larspensjo/SimpleSignal/master/SimpleSignal.h ${CMAKE_SOURCE_DIR}/deps/include/SimpleSignal.h)
+    file(DOWNLOAD  ${CMAKE_SOURCE_DIR}/deps/include/SimpleSignal.h)
 endif()
 
 if (NOT EXISTS ${CMAKE_SOURCE_DIR}/deps/include/json.hpp)
@@ -27,6 +27,7 @@ if(BUILD_TARGET_COMMON)
     add_subdirectory(./common)
 
     if(BUILD_TARGET_HUB)
+        add_subdirectory(./deps/LouisNet)
         add_subdirectory(./hub)
     endif()
 
