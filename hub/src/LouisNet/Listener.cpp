@@ -19,6 +19,9 @@
 
 
 namespace LouisNet {
+
+Simple::Signal<void(Listener*, AsyncSocket*)> Listener::on_accept;
+
 Listener::Listener(const std::string& port)
     : m_port(port)
 {
@@ -105,7 +108,7 @@ void Listener::listen_worker()
         inet_ntop(their_addr.ss_family,
             their_addr_conv->sa_family ? (void*)&(((struct sockaddr_in*)their_addr_conv)->sin_addr) : (void*)&(((struct sockaddr_in6*)their_addr_conv)->sin6_addr),
             s, sizeof s);
-        signal.on_accept.emit(this, add_connection(new_fd, std::string(s), m_port));
+        on_accept.emit(this, add_connection(new_fd, std::string(s), m_port));
     }
 }
 

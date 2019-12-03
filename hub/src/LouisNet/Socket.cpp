@@ -17,6 +17,11 @@
 #include "Socket.hpp"
 
 namespace LouisNet {
+Simple::Signal<void(Socket*, const std::string&, const std::string&, const int&)> Socket::on_connect;
+Simple::Signal<void(Socket*, const std::string&)> Socket::on_packet_receive;
+Simple::Signal<void(Socket*, const std::string&)> Socket::on_packet_send;
+Simple::Signal<void(Socket*)> Socket::on_disconnect;
+
 Socket::Socket()
 {
 }
@@ -67,7 +72,7 @@ bool Socket::connect_socket()
     }
 
     freeaddrinfo(servinfo);
-    signal.on_connect.emit(this, m_address, m_port, m_socket_fd);
+    on_connect.emit(this, m_address, m_port, m_socket_fd);
     m_connected = true;
     return true;
 }
@@ -86,7 +91,7 @@ void Socket::set_connection_fd(int fd)
 {
     m_socket_fd = fd;
     m_connected = true;
-    signal.on_connect.emit(this, m_address, m_port, m_socket_fd);
+    on_connect.emit(this, m_address, m_port, m_socket_fd);
 }
 
 std::string Socket::get_address()
@@ -126,7 +131,7 @@ bool Socket::send_data(const std::string& data)
             disconnect();
             return false;
         }
-        signal.on_packet_send.emit(this, data);
+        on_packet_send.emit(this, data);
         return true;
     } else {
         std::cout << "Socket: Not connected" << std::endl;
@@ -154,7 +159,7 @@ std::string Socket::receive_data(int max_size, bool wait)
         if (numbytes > 0) {
             buf[numbytes] = '\0';
             data = std::string(buf);
-            signal.on_packet_receive.emit(this, data);
+            on_packet_receive.emit(this, data);
         }
         free(buf);
         return data;
@@ -174,7 +179,7 @@ void Socket::disconnect()
     close(m_socket_fd);
     if (m_connected) {
         m_connected = false;
-        signal.on_disconnect.emit(this);
+        on_disconnect.emit(this);
     }
 }
 

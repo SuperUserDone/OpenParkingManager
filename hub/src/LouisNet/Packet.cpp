@@ -15,6 +15,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include <Packet.hpp>
+#include <Socket.hpp>
 
 namespace LouisNet {
 Packet::Packet(/* args */)
@@ -45,6 +46,11 @@ int Packet::get_maxsize()
     return m_maxsize;
 }
 
+std::string Packet::get_data()
+{
+    return m_data;
+}
+
 std::string Packet::get_meta_package()
 {
     std::stringstream package;
@@ -70,9 +76,29 @@ std::string Packet::get_data_chunck(int index)
     }
 }
 
+void Packet::set_meta_data(const std::string& meta)
+{
+    std::stringstream package(meta);
+    std::string skip;
+    package >> skip;
+    package >> m_maxsize;
+    package >> m_expected_chuncks;
+    package >> m_expected_data;
+}
+
 void Packet::set_data(const std::string& data)
 {
     m_data = data;
+}
+
+void Packet::set_data(Socket* sock)
+{
+    if (m_expected_chuncks == 0)
+        std::cout << "Please specify meta data." << std::endl;
+    m_data = "";
+    for (int i = 0; i < m_expected_chuncks; i++) {
+        m_data.append(sock->receive_data());
+    }
 }
 
 void Packet::set_max_size(int maxsize)

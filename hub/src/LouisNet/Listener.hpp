@@ -63,9 +63,7 @@ public:
 
     std::vector<Socket*> get_sockets();
 
-    struct {
-        Simple::Signal<void(Listener*, AsyncSocket*)> on_accept;
-    } signal;
+    static Simple::Signal<void(Listener*, AsyncSocket*)> on_accept;
 
     ~Listener();
 };
