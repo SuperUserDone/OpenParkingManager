@@ -14,19 +14,25 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+#include <functional>
 
-#include <iostream>
+#include <LouisNet.hpp>
 
-#include "LouisNet.hpp"
-#include "NetworkingManager.hpp"
+#include "Database.hpp"
 
-int main(void)
-{
+class NetworkingManager {
+private:
+    LouisNet::Listener m_listener;
+    LouisNet::PacketListener m_locate_ticket;
+    LouisNet::PacketListener m_image;
 
-    NetworkingManager nwm;
+    Database* m_db;
 
-    while (true) {
-    }
+public:
+    NetworkingManager();
 
-    return 0;
-}
+    void image_receive_callback(LouisNet::Socket* sock, const std::string& data);
+    void locate_ticket_callback(LouisNet::Socket* sock, const std::string& data);
+
+    ~NetworkingManager();
+};

@@ -33,7 +33,7 @@ int Database::callback(void *NotUsed, int argc, char **argv, char **azColName)
     for(int i=0; i<argc; i++)
     {
         printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
-        m_query_results[azColName[i]] = argv[i];
+        m_query_results[azColName[i]] = argv[i] ? argv[i] : "NULL";
     }
     m_query_results_available = true;
     printf("\n");
@@ -81,7 +81,7 @@ void Database::remove_parking(const std::string& parking)
     query(querys.str());
 }
 
-std::string Database::get_parking_by_ticket(uint64_t ticket)
+std::string Database::get_parking_by_ticket(uint32_t ticket)
 {
     std::stringstream querys;
     querys << "SELECT Parking FROM Parking0 WHERE Ticket = " << ticket;
@@ -89,7 +89,7 @@ std::string Database::get_parking_by_ticket(uint64_t ticket)
     return parking;
 }
 
-void Database::store_vehicle(const std::string& license, uint64_t ticket)
+void Database::store_vehicle(const std::string& license, uint32_t ticket)
 {
     std::stringstream querys;
     querys << "DELETE FROM Parking0 WHERE License = '" << license << "'";
@@ -109,7 +109,7 @@ void Database::store_parking(const std::string& license, const std::string& park
     query(querys.str());
 }
 
-void Database::destroy_ticket(uint64_t ticket)
+void Database::destroy_ticket(uint32_t ticket)
 {
     std::stringstream querys;
     querys << "DELETE FROM Parking0 WHERE Ticket = '" << ticket << "'";

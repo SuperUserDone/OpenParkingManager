@@ -38,12 +38,12 @@ public:
     Database(Database const&) = delete;
     void operator=(Database const&) = delete;
 
-    std::string get_parking_by_ticket(uint64_t ticket);
+    std::string get_parking_by_ticket(uint32_t ticket);
 
-    void store_vehicle(const std::string& license, uint64_t ticket);
+    void store_vehicle(const std::string& license, uint32_t ticket);
     void store_parking(const std::string& license, const std::string& parking);
     void remove_parking(const std::string& parking);
-    void destroy_ticket(uint64_t ticket);
+    void destroy_ticket(uint32_t ticket);
     std::map<std::string, std::string> query(const std::string& query);
 
     int callback(void *NotUsed, int argc, char **argv, char **azColName);
