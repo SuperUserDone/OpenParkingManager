@@ -16,18 +16,21 @@ OpenParkingManager - An open source parking manager and parking finder.
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <iomanip>
-#include <stdio.h>
-#include <sys/socket.h>
 #include <arpa/inet.h>
-#include <unistd.h>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <stdio.h>
 #include <string.h>
+#include <sys/socket.h>
 #include <thread>
+#include <unistd.h>
 
+#include <base64.hpp>
 #include <json.hpp>
+
+#include <LouisNet.hpp>
 
 #define PORT 6969
 
@@ -48,7 +51,27 @@ int main()
     ip = config["config"]["ip"];
     disk = config["config"]["disk"];
 
-    std::ifstream in_file("cutecat.jpg", std::ios::binary | std::ios::app);
+    std::ifstream in_file("./images/group_photo.jpg");
+
+    std::string str((std::istreambuf_iterator<char>(in_file)), std::istreambuf_iterator<char>());
+
+    in_file.close();
+
+    std::string b64str = base64_encode((const unsigned char*)str.c_str(), str.length());
+
+    LouisNet::Packet pack(b64str, 128);
+    LouisNet::Socket sock(ip, "6969");
+    sock.m_maxsize = 128;
+    sock.connect_socket();
+    sock.send_data(pack);
+
+    std::cout << pack.get_meta_package() << std::endl;
+
+    for (int i = 0; i < pack.get_chunck_count(); i++) {
+          std::cout << pack.get_data_chunck(i);
+    }
+
+    std::cout << std::endl;
 
     return 0;
 }
