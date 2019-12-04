@@ -16,11 +16,15 @@
 */
 
 #include "NetworkingManager.hpp"
+#include <base64.hpp>
+#include <opencv2/opencv.hpp>
+#include <ReadLicensePlates.hpp>
+#include <sha1.hpp>
 
 NetworkingManager::NetworkingManager()
     : m_listener("6969")
     , m_locate_ticket("LT.*")
-    , m_image("MP\n\\d+\n\\d+\n\\d+\n")
+    , m_image("MP(\n.*)*")
 {
     m_db = &Database::getInstance();
     m_locate_ticket.set_run_function(std::bind(&NetworkingManager::locate_ticket_callback, this, std::placeholders::_1, std::placeholders::_2));
@@ -31,6 +35,23 @@ NetworkingManager::NetworkingManager()
 
 void NetworkingManager::image_receive_callback(LouisNet::Socket* sock, const std::string& data)
 {
+    LouisNet::Packet temp;
+    temp.set_meta_data(data);
+    temp.set_data(sock);
+
+    std::string fcontent = temp.get_data();
+
+    std::string final_str = base64_decode(fcontent);
+
+    std::vector<char> img(fcontent.begin(), fcontent.end());
+
+    std::string uid = sha1(fcontent);
+    fcontent.clear();
+
+    cv::Mat raw_data(img);
+
+    read_plate(cv::imdecode(raw_data, true), cv::Rect(0, 0, 0, 0), "images", uid);
+
 }
 
 void NetworkingManager::locate_ticket_callback(LouisNet::Socket* sock, const std::string& data)
