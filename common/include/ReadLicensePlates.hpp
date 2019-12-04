@@ -21,20 +21,7 @@ OpenParkingManager - An open source parking manager and parking finder.
 #include <string>
 #include <iostream>
 #include <vector>
+#include <opencv2/opencv.hpp>
+#include <tesseract/baseapi.h>
 
-struct rectangle 
-{
-    int x;
-    int y;
-    int width;
-    int height;
-    rectangle(int ix, int iy, int iwidth, int iheight)
-    {
-        x = ix;
-        y = iy;
-        width = iwidth;
-        height = iheight;
-    }
-};
-
-std::string read_plate(int camera_number, rectangle crop);
+std::string read_plate(cv::Mat frame, cv::Rect crop, const std::string& path, std::string& UID);

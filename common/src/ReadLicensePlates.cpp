@@ -15,95 +15,68 @@ OpenParkingManager - An open source parking manager and parking finder.
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
-#include <opencv2/opencv.hpp>
-#include <tesseract/baseapi.h>
-
 #include "ReadLicensePlates.hpp"
 
-std::string valid_chars = "BCDFGHJKMNPRSTVWZ23456789\0";
+static std::string valid_chars = "BCDFGHJKMNPRSTVWZ23456789\0";
 
-bool compareContourAreas ( std::vector<cv::Point> contour1, std::vector<cv::Point> contour2 ) {
-    double i = fabs( contourArea(cv::Mat(contour1)) );
-    double j = fabs( contourArea(cv::Mat(contour2)) );
-    return ( i < j );
+static bool compareContourAreas(std::vector<cv::Point> contour1, std::vector<cv::Point> contour2)
+{
+    double i = fabs(contourArea(cv::Mat(contour1)));
+    double j = fabs(contourArea(cv::Mat(contour2)));
+    return (i < j);
 }
 
-std::string sanatise(std::string text)
+static std::string sanatise(std::string text)
 {
     std::string final = "";
-    for(char ti: text)
-    {
-        for(char it: valid_chars)
-        {
-            if(it == ti)
-            {
+    for (char ti : text) {
+        for (char it : valid_chars) {
+            if (it == ti) {
                 final.push_back(it);
             }
         }
     }
-    if(final.length() < 7)
+    if (final.length() < 7)
         final = "";
     return final;
 }
 
-std::string OCR(cv::Mat in)
+std::string read_plate(cv::Mat frame, cv::Rect crop, const std::string& path, std::string& UID)
 {
-    tesseract::TessBaseAPI tess;
-    if (tess.Init(NULL, "eng")) {
-        fprintf(stderr, "Could not initialize tesseract.\n");
-        exit(1);
-    }
-    tess.SetImage((uchar*)in.data, in.size().width, in.size().height, in.channels(), in.step1());
-    tess.Recognize(0);
-
-    std::string license_plate_text = tess.GetUTF8Text();
-    license_plate_text = sanatise(license_plate_text);
-}
+    UID = path + UID;
+    cv::imwrite(UID + "-" + "out_frame.png", frame);
 
 
-std::string read_plate(int camera_number, rectangle crop)
-{
-    cv::VideoCapture cap;
-    if(!cap.open(camera_number))
-        return "";
-    cv::Mat frame;
-    cap >> frame;
-    
-    cv::imwrite("out_frame.png",frame);
-
-    cv::Rect ROI;
-    ROI.x = crop.x;
-    ROI.y = crop.y;
-    ROI.width = crop.width;
-    ROI.height = crop.height;
-    if(crop.width == 0)
-        ROI.width = frame.size().height;
     if(crop.height == 0)
-        ROI.height = frame.size().height;
-    frame = frame(ROI);
+    {
+        crop.height == frame.size().height;
+    }
+    if(crop.width == 0)
+    {
+        crop.width == frame.size().height;
+    }
 
-    cv::imwrite("out_frame_cropped.png",frame);
-
+    cv::imwrite(UID + "-" + "out_frame_cropped.png", frame);
     cv::Mat grey;
     cv::cvtColor(frame, grey, cv::COLOR_BGR2GRAY);
-    cv::imwrite("out_grey.png", grey);
+    cv::imwrite(UID + "-" + "out_grey.png", grey);
 
     cv::Mat blur;
     cv::bilateralFilter(grey, blur, 14, 17, 17);
-    cv::imwrite("out_blur.png", blur);
+    cv::imwrite(UID + "-" + "out_blur.png", blur);
 
     cv::Mat edges;
     cv::Canny(blur, edges, 30, 200);
-    cv::imwrite("out_edges.png", edges);
+    cv::imwrite(UID + "-" + "out_edges.png", edges);
 
     std::vector<std::vector<cv::Point>> contours;
     cv::findContours(edges, contours, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
 
-    if(!contours.size())
+    if (!contours.size())
         return "";
 
-    std::cout << contours.size() << std::endl;;
+    std::cout << contours.size() << std::endl;
+    ;
 
     std::sort(contours.begin(), contours.end(), compareContourAreas);
 
@@ -111,15 +84,12 @@ std::string read_plate(int camera_number, rectangle crop)
 
     std::vector<cv::Point> license_plate;
 
-    for(std::vector<cv::Point> vec : contours)
-    {
-        if(fabs(cv::contourArea(vec)) > 20000)
-        {
+    for (std::vector<cv::Point> vec : contours) {
+        if (fabs(cv::contourArea(vec)) > 20000) {
             double perimiter = cv::arcLength(vec, true);
             std::vector<cv::Point> approx_poligon;
             cv::approxPolyDP(vec, approx_poligon, 0.018 * perimiter, true);
-            if(approx_poligon.size() == 4)
-            {
+            if (approx_poligon.size() == 4) {
                 license_plate = approx_poligon;
                 std::cout << "Found!!!" << std::endl;
                 break;
@@ -127,26 +97,25 @@ std::string read_plate(int camera_number, rectangle crop)
         }
     }
 
-    if(!license_plate.size())
-    {
-        if(contours[0].size() > 2)
+    if (!license_plate.size()) {
+        if (contours[0].size() > 2)
             license_plate = contours[0];
         else
             return "";
     }
 
-    cv::drawContours(frame, std::vector<std::vector<cv::Point>> {license_plate}, -1, cv::Scalar(255,255,255),5);
+    cv::drawContours(frame, std::vector<std::vector<cv::Point>> { license_plate }, -1, cv::Scalar(255, 255, 255), 5);
 
     cv::Mat mask(frame.size(), CV_8UC1);
     mask = 0;
-    cv::fillPoly(mask, std::vector<std::vector<cv::Point>> {license_plate}, cv::Scalar(255), 8, 0);
-    cv::imwrite("out_mask.png", mask);
+    cv::fillPoly(mask, std::vector<std::vector<cv::Point>> { license_plate }, cv::Scalar(255), 8, 0);
+    cv::imwrite(UID + "-" + "out_mask.png", mask);
 
     cv::Mat final_image;
     cv::bitwise_and(frame, frame, final_image, mask);
     cv::bitwise_not(mask, mask);
     cv::bitwise_or(cv::Scalar(255, 255, 255), final_image, final_image, mask);
-    cv::imwrite("final_image.png", mask);
+    cv::imwrite(UID + "-" + "final_image.png", mask);
 
     cv::cvtColor(final_image, final_image, cv::COLOR_BGR2GRAY);
     cv::threshold(final_image, final_image, 148, 255, cv::THRESH_BINARY);
@@ -159,7 +128,7 @@ std::string read_plate(int camera_number, rectangle crop)
         if (*it)
             points.push_back(it.pos());
 
-    if(points.size() < 3)
+    if (points.size() < 3)
         return "";
 
     cv::RotatedRect box = cv::minAreaRect(cv::Mat(points));
