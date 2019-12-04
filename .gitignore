@@ -2,5 +2,6 @@ peda-*
 build
 vgcore.*
 *vscode*
-deps/include
+deps/include/json.hpp
+data
 database.db
