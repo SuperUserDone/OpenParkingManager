@@ -27,83 +27,79 @@ File myFile;
 
 bool demo = false;
 
-char* parkings[] = {"Floor 4 Pos A6", "Floor 4 Pos B4", "Floor 4 Pos B7", "Floor 4 Pos B1"};
-
-int posi = 0;
-
-void setup() {
-
-  // put your setup code here, to run once:
-  Serial.begin(9600);
-  lcd.begin(16, 2);
-  lcd.print("Hello, world");
-  pinMode(8, INPUT_PULLUP);
-  delay(200);
-  if (!digitalRead(8))
-  {
-    while (!digitalRead(8)) {}
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("DEMO");
-    delay(2000);
-    demo = true;
-  }
+void setup()
+{
+    Serial.begin(9600);
+    lcd.begin(16, 2);
+    lcd.print("Hello, world");
+    pinMode(8, INPUT_PULLUP);
+    delay(200);
+    if (!digitalRead(8)) {
+        while (!digitalRead(8)) {
+        }
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("DEMO");
+        delay(2000);
+        demo = true;
+    }
 }
 
-void loop() {
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Insert Ticket");
-  while (digitalRead(8)) {}
-
-  while (!digitalRead(8)) {}
-
-  if (!demo)
-  {
-    SD.begin(10);
-    myFile = SD.open("ticket.txt");
-    if (myFile) {
-      lcd.clear();
-      lcd.setCursor(0, 0);
-      lcd.print("Reading...");
-      while (myFile.available()) {
-        Serial.write(myFile.read());
-      }
-      Serial.println("");
-      // close the file:
-      myFile.close();
-      while (!Serial.available() > 0) {}
-      lcd.clear();
-      lcd.setCursor(0, 0);
-      lcd.print("You parked at:");
-      lcd.setCursor(0, 1);
-      delay(500);
-      while (Serial.available() > 0)
-      {
-        lcd.write(Serial.read());
-      }
-    } else {
-      lcd.clear();
-      lcd.setCursor(0, 0);
-      lcd.print("Failed to read");
-      lcd.setCursor(0, 1);
-      lcd.print("Ticket");
-      delay(3000);
-      lcd.clear();
-      lcd.setCursor(0, 0);
-      lcd.print("Please try again");
+void loop()
+{
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Insert Ticket");
+    while (digitalRead(8)) {
     }
-  } else {
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Reading...");
-    delay(2000);
-    lcd.setCursor(0, 0);
-    lcd.clear();
-    lcd.print("You parked at:");
-    lcd.setCursor(0, 1);
-    lcd.print(parkings[posi++ % 4]);
-  }
-  delay(5000);
 
+    while (!digitalRead(8)) {
+    }
+
+    if (!demo) {
+        SD.begin(10);
+        myFile = SD.open("ticket.txt");
+        if (myFile) {
+            lcd.clear();
+            lcd.setCursor(0, 0);
+            lcd.print("Reading...");
+            while (myFile.available()) {
+                Serial.write(myFile.read());
+            }
+            Serial.println("");
+            // close the file:
+            myFile.close();
+            while (!Serial.available() > 0) {
+            }
+            lcd.clear();
+            lcd.setCursor(0, 0);
+            lcd.print("You parked at:");
+            lcd.setCursor(0, 1);
+            delay(500);
+            while (Serial.available() > 0) {
+                lcd.write(Serial.read());
+            }
+        } else {
+            lcd.clear();
+            lcd.setCursor(0, 0);
+            lcd.print("Failed to read");
+            lcd.setCursor(0, 1);
+            lcd.print("Ticket");
+            delay(3000);
+            lcd.clear();
+            lcd.setCursor(0, 0);
+            lcd.print("Please try again");
+        }
+    } else {
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Reading...");
+        delay(2000);
+        lcd.setCursor(0, 0);
+        lcd.clear();
+        lcd.print("You parked at:");
+        lcd.setCursor(0, 1);
+        lcd.print("Floor 4 Pos A6");
+    }
+    delay(5000);
 }

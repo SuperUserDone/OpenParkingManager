@@ -84,7 +84,7 @@ void Database::remove_parking(const std::string& parking)
 std::string Database::get_parking_by_ticket(const std::string& ticket)
 {
     std::stringstream querys;
-    querys << "SELECT Parking FROM Parking0 WHERE Ticket = " << ticket;
+    querys << "SELECT Parking FROM Parking0 WHERE Ticket = '" << ticket << "'";
     std::string parking = query(querys.str())["Parking"];
     return parking;
 }

@@ -23,7 +23,7 @@
 
 NetworkingManager::NetworkingManager()
     : m_listener("6969")
-    , m_locate_ticket("LT.*")
+    , m_locate_ticket("LT.*\n?")
     , m_image("MP(\n.*)*")
 {
     m_db = &Database::getInstance();
@@ -64,12 +64,12 @@ void NetworkingManager::image_receive_callback(LouisNet::Socket* sock, const std
         m_db->store_vehicle(license_plate, uid);
     }
     if (flag_type == "STORE") {
-        std::string license_plate = read_plate(cv::imdecode(raw_data, true), cv::Rect(0, 0, 0, 0), "./data/img/", uid, "parked/" + uid + "/");
+        std::string license_plate = read_plate(cv::imdecode(raw_data, true), cv::Rect(0, 0, 0, 0), "./data/img/", uid, "");
         std::string ticket = m_db->get_ticket_by_license(license_plate);
-        
+
         try {
-            std::filesystem::copy("./data/img/" + uid + "/parked/" + uid, "./data/img/" + ticket + "/parked/" + uid);
-            std::filesystem::remove_all("./data/img/" + uid + "/parked/" + uid);
+            std::filesystem::create_directories("./data/img/" + ticket + "/parked/" + uid + "");
+            std::filesystem::rename("./data/img/" + uid, "./data/img/" + ticket + "/parked/" + uid);
         } catch (std::exception& e) {
             std::cerr << e.what() << std::endl;
         }
@@ -83,6 +83,11 @@ void NetworkingManager::image_receive_callback(LouisNet::Socket* sock, const std
 void NetworkingManager::locate_ticket_callback(LouisNet::Socket* sock, const std::string& data)
 {
     std::string data_args = data.substr(2);
+    size_t location = data_args.find("\n");
+    while (location != std::string::npos) {
+        data_args.erase(location, 1);
+        location = data_args.find("\n");
+    }
     std::string result = m_db->get_parking_by_ticket(data_args);
     sock->send_data((result == "") ? "NULL" : result);
 }

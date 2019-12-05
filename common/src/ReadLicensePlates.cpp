@@ -123,7 +123,39 @@ std::string read_plate(cv::Mat frame, cv::Rect crop, const std::string& path, co
     cv::bitwise_not(final_image, final_image);
 
     cv::imwrite(path_final + "final_image.png", final_image);
-    cv::RotatedRect crop_final = cv::minAreaRect(license_plate);
+
+    std::vector<cv::Point> points;
+    cv::Mat_<uchar>::iterator it = final_image.begin<uchar>();
+    cv::Mat_<uchar>::iterator end = final_image.end<uchar>();
+    for (; it != end; ++it)
+        if (*it)
+            points.push_back(it.pos());
+
+    if (points.size() < 3)
+        return "";
+
+    cv::RotatedRect box = cv::minAreaRect(cv::Mat(points));
+
+    double angle = box.angle;
+
+    if (angle < -45)
+        angle = (90 + angle);
+
+    cv::Mat rot_mat = cv::getRotationMatrix2D(box.center, angle, 1);
+
+    cv::warpAffine(final_image, final_image, rot_mat, final_image.size(), cv::INTER_CUBIC);
+
+    points.clear();
+    it = final_image.begin<uchar>();
+    end = final_image.end<uchar>();
+    for (; it != end; ++it)
+        if (*it)
+            points.push_back(it.pos());
+
+    if (points.size() < 3)
+        return "";
+
+    cv::RotatedRect crop_final = cv::minAreaRect(points);
 
     cv::Mat cropped_image = final_image(crop_final.boundingRect());
     cv::imwrite(path_final + "final_image_cropped.png", cropped_image);
