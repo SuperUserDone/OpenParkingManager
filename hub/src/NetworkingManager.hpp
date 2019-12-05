@@ -16,6 +16,7 @@
 */
 #include <functional>
 #include <fstream>
+#include <filesystem>
 
 #include <LouisNet.hpp>
 

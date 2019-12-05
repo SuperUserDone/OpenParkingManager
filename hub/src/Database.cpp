@@ -81,7 +81,7 @@ void Database::remove_parking(const std::string& parking)
     query(querys.str());
 }
 
-std::string Database::get_parking_by_ticket(uint32_t ticket)
+std::string Database::get_parking_by_ticket(const std::string& ticket)
 {
     std::stringstream querys;
     querys << "SELECT Parking FROM Parking0 WHERE Ticket = " << ticket;
@@ -89,7 +89,16 @@ std::string Database::get_parking_by_ticket(uint32_t ticket)
     return parking;
 }
 
-void Database::store_vehicle(const std::string& license, uint32_t ticket)
+std::string Database::get_ticket_by_license(const std::string& license)
+{
+    std::stringstream querys;
+    querys << "SELECT Ticket FROM Parking0 WHERE License = '" << license << "'";
+    std::string ticket = query(querys.str())["Ticket"];
+    return ticket;
+}
+
+
+void Database::store_vehicle(const std::string& license, const std::string& ticket)
 {
     std::stringstream querys;
     querys << "DELETE FROM Parking0 WHERE License = '" << license << "'";
@@ -109,7 +118,7 @@ void Database::store_parking(const std::string& license, const std::string& park
     query(querys.str());
 }
 
-void Database::destroy_ticket(uint32_t ticket)
+void Database::destroy_ticket(const std::string& ticket)
 {
     std::stringstream querys;
     querys << "DELETE FROM Parking0 WHERE Ticket = '" << ticket << "'";

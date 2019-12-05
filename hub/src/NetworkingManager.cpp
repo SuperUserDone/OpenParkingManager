@@ -16,9 +16,9 @@
 */
 
 #include "NetworkingManager.hpp"
+#include <ReadLicensePlates.hpp>
 #include <base64.hpp>
 #include <opencv2/opencv.hpp>
-#include <ReadLicensePlates.hpp>
 #include <sha1.hpp>
 
 NetworkingManager::NetworkingManager()
@@ -41,23 +41,49 @@ void NetworkingManager::image_receive_callback(LouisNet::Socket* sock, const std
 
     std::string fcontent = temp.get_data();
 
+    std::string flags = sock->receive_data(1024, true, false);
+
     std::string final_str = base64_decode(fcontent);
 
-    std::vector<char> img(fcontent.begin(), fcontent.end());
+    std::vector<char> img(final_str.begin(), final_str.end());
 
     std::string uid = sha1(fcontent);
     fcontent.clear();
 
     cv::Mat raw_data(img);
 
-    read_plate(cv::imdecode(raw_data, true), cv::Rect(0, 0, 0, 0), "images", uid);
+    std::stringstream flags_stream(flags);
 
+    std::string flag_type, flag_data;
+    flags_stream >> flag_type >> flag_data;
+    std::cout << "FLAG: " << flag_type << std::endl;
+    if (flag_type == "ENTRY") {
+        std::string license_plate = read_plate(cv::imdecode(raw_data, true), cv::Rect(0, 0, 0, 0), "./data/img/", uid, "entry");
+        std::cout << "License plate " << license_plate << std::endl;
+        sock->send_data(uid);
+        m_db->store_vehicle(license_plate, uid);
+    }
+    if (flag_type == "STORE") {
+        std::string license_plate = read_plate(cv::imdecode(raw_data, true), cv::Rect(0, 0, 0, 0), "./data/img/", uid, "parked/" + uid + "/");
+        std::string ticket = m_db->get_ticket_by_license(license_plate);
+        
+        try {
+            std::filesystem::copy("./data/img/" + uid + "/parked/" + uid, "./data/img/" + ticket + "/parked/" + uid);
+            std::filesystem::remove_all("./data/img/" + uid + "/parked/" + uid);
+        } catch (std::exception& e) {
+            std::cerr << e.what() << std::endl;
+        }
+
+        std::cout << "License plate " << license_plate << std::endl;
+        m_db->store_parking(license_plate, flag_data);
+        sock->send_data("OK");
+    }
 }
 
 void NetworkingManager::locate_ticket_callback(LouisNet::Socket* sock, const std::string& data)
 {
     std::string data_args = data.substr(2);
-    std::string result = m_db->get_parking_by_ticket(strtoul(data_args.c_str(), NULL, 0));
+    std::string result = m_db->get_parking_by_ticket(data_args);
     sock->send_data((result == "") ? "NULL" : result);
 }
 

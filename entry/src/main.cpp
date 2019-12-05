@@ -47,11 +47,12 @@ int main()
 
     std::ifstream config_file("entry_config.json");
     config_file >> config;
+    config_file.close();
 
     ip = config["config"]["ip"];
     disk = config["config"]["disk"];
 
-    std::ifstream in_file("./images/group_photo.jpg");
+    std::ifstream in_file("./images/test.jpg");
 
     std::string str((std::istreambuf_iterator<char>(in_file)), std::istreambuf_iterator<char>());
 
@@ -65,13 +66,8 @@ int main()
     sock.connect_socket();
     sock.send_data(pack);
 
-    std::cout << pack.get_meta_package() << std::endl;
-
-    for (int i = 0; i < pack.get_chunck_count(); i++) {
-          std::cout << pack.get_data_chunck(i);
-    }
-
-    std::cout << std::endl;
+    std::cout << sock.receive_data() << std::endl;
+    sock.send_data("ENTRY NULL");
 
     return 0;
 }

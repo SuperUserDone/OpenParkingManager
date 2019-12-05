@@ -24,4 +24,4 @@ OpenParkingManager - An open source parking manager and parking finder.
 #include <opencv2/opencv.hpp>
 #include <tesseract/baseapi.h>
 
-std::string read_plate(cv::Mat frame, cv::Rect crop, const std::string& path, std::string& UID);
+std::string read_plate(cv::Mat frame, cv::Rect crop, const std::string& path, const std::string& UID, const std::string& context);
