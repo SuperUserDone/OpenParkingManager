@@ -17,7 +17,7 @@ pkg_check_modules(COMMON_LIBS REQUIRED opencv4 tesseract)
 include_directories("${COMMON_LIBS_INCLUDE_DIRS}")
 include_directories("${CMAKE_SOURCE_DIR}/common/include/")
 include_directories("${CMAKE_SOURCE_DIR}/deps/include/")
-include_directories("${PROJECT_SOURCE_DIR}/deps/LouisNet/include/")
+include_directories("${PROJECT_SOURCE_DIR}/digestpp")
 
 if(BUILD_TARGET_COMMON)
     add_subdirectory(./common)

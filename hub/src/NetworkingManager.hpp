@@ -33,9 +33,9 @@ public:
 
     void start();
 
-    int auth(const httplib::Request &req, httplib::Response &res);
-    void image_receive(const httplib::Request &req, httplib::Response &res);
-    void locate_ticket(const httplib::Request &req, httplib::Response &res);
+    void login(const httplib::Request &req, httplib::Response &res);
+
+    void user_id(const httplib::Request &req, httplib::Response &res);
 
     ~NetworkingManager();
 };
