@@ -15,27 +15,25 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#include <filesystem>
-#include <fstream>
-#include <functional>
+#pragma once
 
-#include <httplib.h>
+#include <string>
+#include <vector>
 
-#include "Database.hpp"
-
-class NetworkingManager
+struct Ticket
 {
-private:
-    Database *m_db;
+    std::string Ticket = "";
+    std::string License = "";
+    std::string Parking = "";
+};
 
-public:
-    NetworkingManager();
+struct User
+{
+    std::string Email = "";
+    std::string Password = "";
+    std::string ID = "";
 
-    void start();
+    std::vector<std::string> Owns = {};
 
-    int auth(const httplib::Request &req, httplib::Response &res);
-    void image_receive(const httplib::Request &req, httplib::Response &res);
-    void locate_ticket(const httplib::Request &req, httplib::Response &res);
-
-    ~NetworkingManager();
+    int Priv = 1;
 };

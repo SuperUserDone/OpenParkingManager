@@ -1,0 +1,9 @@
+﻿BasedOnStyle: LLVM
+AccessModifierOffset: '-4'
+AlignAfterOpenBracket: Align
+AlwaysBreakTemplateDeclarations: 'Yes'
+BreakBeforeBraces: Allman
+IndentWidth: '4'
+Language: Cpp
+Standard: Cpp11
+TabWidth: '4'
