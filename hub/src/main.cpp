@@ -22,16 +22,9 @@
 
 int main(void)
 {
-    Database *m_db = &Database::get();
+    NetworkingManager mng;
 
-    User u;
-    u.Password = "ABCD";
-
-    u = m_db->get_user(u);
-
-    u.Email = "A@b.com";
-
-    m_db->update_user(u);
+    mng.start();
 
     return 0;
 }

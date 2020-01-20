@@ -15,26 +15,156 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+#include <functional>
 
-#include "NetworkingManager.hpp"
 #include <ReadLicensePlates.hpp>
 #include <base64.hpp>
+#include <digestpp.hpp>
 #include <opencv2/opencv.hpp>
-#include <sha1.hpp>
 
-NetworkingManager::NetworkingManager() { m_db = &Database::get(); }
+#include "NetworkingManager.hpp"
 
-void start();
+using namespace std::placeholders;
 
-int NetworkingManager::auth(const httplib::Request &req, httplib::Response &res)
+bool NetworkingManager::auth(const std::string &password, const std::string &ID)
+{
+    User temp;
+    temp.Password = password;
+    temp.ID = ID;
+
+    User user_data = m_db->get_user(temp);
+
+    if (user_data.Email == "NULL")
+        return false;
+
+    return true;
+}
+
+NetworkingManager::NetworkingManager()
+{
+    m_db = &Database::get();
+
+    AddressFunction temp = std::bind(&NetworkingManager::root, this, _1, _2);
+    m_server.Get("/", temp);
+
+    temp = std::bind(&NetworkingManager::stop, this, _1, _2);
+    m_server.Get("/stop", temp);
+
+    temp = std::bind(&NetworkingManager::entry_issue_ticket, this, _1, _2);
+    m_server.Post("/entry/issue", temp);
+
+    temp = std::bind(&NetworkingManager::user_login, this, _1, _2);
+    m_server.Post("/user/login", temp);
+
+    temp = std::bind(&NetworkingManager::user_add_ticket, this, _1, _2);
+    m_server.Post(R"(/user/(\S+)/ticket/add/(\S+))", temp);
+}
+
+void NetworkingManager::start() { m_server.listen("0.0.0.0", 8080); }
+
+void NetworkingManager::stop(const httplib::Request &, httplib::Response &)
+{
+    m_server.stop();
+}
+
+void NetworkingManager::root(const httplib::Request &req,
+                             httplib::Response &res)
+{
+    res.set_content("up", "text/plain");
+}
+
+void NetworkingManager::entry_issue_ticket(const httplib::Request &req,
+                                           httplib::Response &res)
+{
+    res.set_content("Hello World!", "text/json");
+}
+
+void NetworkingManager::user_login(const httplib::Request &req,
+                                   httplib::Response &res)
+{
+    if (req.has_file("email") && req.has_file("password"))
+    {
+        User temp;
+        temp.Email = req.get_file_value("email").content;
+        temp.Password = req.get_file_value("password").content;
+
+        User user_data = m_db->get_user(temp);
+
+        if (user_data.ID == "NULL")
+        {
+            res.status = 401;
+            return;
+        }
+
+        res.set_content(user_data.ID, "text/plain");
+    }
+    else
+    {
+        res.status = 401;
+    }
+}
+
+void NetworkingManager::user_add_ticket(const httplib::Request &req,
+                                        httplib::Response &res)
+{
+    if (!req.has_file("password"))
+    {
+        res.status = 401;
+        return;
+    }
+
+    std::string user = req.matches[1];
+    std::string ticket = req.matches[2];
+    std::string password = req.get_file_value("password").content;
+
+    Ticket temp_ticket;
+    temp_ticket.Ticket = ticket;
+
+    temp_ticket = m_db->get_ticket(temp_ticket);
+
+    if (temp_ticket.Ticket == "NULL" || !auth(password, user))
+    {
+        res.status = 401;
+        return;
+    }
+
+    User temp_user;
+    temp_user.ID = user;
+    temp_user.Password = password;
+
+    temp_user = m_db->get_user(temp_user);
+
+    temp_user.Owns.push_back(temp_ticket.Ticket);
+
+    m_db->update_user(temp_user);
+}
+
+void NetworkingManager::user_get_tickets(const httplib::Request &req,
+                                         httplib::Response &res)
 {
 }
-void NetworkingManager::image_receive(const httplib::Request &req,
-                                      httplib::Response &res)
+
+void NetworkingManager::user_pay_ticket(const httplib::Request &req,
+                                        httplib::Response &res)
 {
 }
-void NetworkingManager::locate_ticket(const httplib::Request &req,
-                                      httplib::Response &res)
+
+void NetworkingManager::data_get_image(const httplib::Request &req,
+                                       httplib::Response &res)
+{
+}
+
+void NetworkingManager::node_store_parking(const httplib::Request &req,
+                                           httplib::Response &res)
+{
+}
+
+void NetworkingManager::payment_get_parking(const httplib::Request &req,
+                                            httplib::Response &res)
+{
+}
+void NetworkingManager::payment_pay_ticket(const httplib::Request &req,
+                                           httplib::Response &res)
 {
 }
 

@@ -8,4 +8,4 @@ include_directories(${PROJECT_SOURCE_DIR}/hub/src/)
 
 add_executable(OpenParkingManagerHub ${SRC_FILES})
 
-target_link_libraries(OpenParkingManagerHub ${SQLITE_LIBRARIES} OpenParkingManagerCommonLib ${COMMON_LIBS})
+target_link_libraries(OpenParkingManagerHub ${SQLITE_LIBRARIES} OpenParkingManagerCommonLib pthread ${COMMON_LIBS})

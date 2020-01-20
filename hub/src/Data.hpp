@@ -20,12 +20,25 @@
 #include <string>
 #include <vector>
 
+#include <json.hpp>
+
 struct Ticket
 {
     std::string Ticket = "";
     std::string License = "";
     std::string Parking = "";
+    bool paid = false;
 };
+
+inline void to_json(nlohmann::json &j, const Ticket &t)
+{
+    j = nlohmann::json{{"ticket", t.Ticket},
+                       {"parking", t.Parking},
+                       {"ticket", t.Ticket},
+                       {"paid", t.paid}};
+}
+
+inline void from_json(const nlohmann::json &j, Ticket &t) {}
 
 struct User
 {

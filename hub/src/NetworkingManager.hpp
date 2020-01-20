@@ -23,19 +23,43 @@
 
 #include "Database.hpp"
 
+using AddressFunction =
+    std::function<void(const httplib::Request &req, httplib::Response &res)>;
+
 class NetworkingManager
 {
 private:
     Database *m_db;
 
+    httplib::Server m_server;
+
+    bool auth(const std::string &password, const std::string &ID);
+
 public:
     NetworkingManager();
 
     void start();
+    void stop(const httplib::Request &, httplib::Response &);
 
-    void login(const httplib::Request &req, httplib::Response &res);
+    void root(const httplib::Request &req, httplib::Response &res);
 
-    void user_id(const httplib::Request &req, httplib::Response &res);
+    void entry_issue_ticket(const httplib::Request &req,
+                            httplib::Response &res); // /entry/issue
+
+    void user_login(const httplib::Request &req, httplib::Response &res);
+    void user_add_ticket(const httplib::Request &req, httplib::Response &res);
+    void user_get_tickets(const httplib::Request &req, httplib::Response &res);
+    void user_pay_ticket(const httplib::Request &req, httplib::Response &res);
+
+    void data_get_image(const httplib::Request &req, httplib::Response &res);
+
+    void node_store_parking(const httplib::Request &req,
+                            httplib::Response &res);
+
+    void payment_get_parking(const httplib::Request &req,
+                             httplib::Response &res);
+    void payment_pay_ticket(const httplib::Request &req,
+                            httplib::Response &res);
 
     ~NetworkingManager();
 };
