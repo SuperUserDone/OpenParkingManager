@@ -4,7 +4,8 @@
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or any later version.
+    the Free Software Foundation, either version 3 of the License, or any later
+   version.
 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -16,11 +17,12 @@
 */
 #pragma once
 
+#include <map>
 #include <sqlite3.h>
 #include <stdint.h>
 #include <string>
-#include <mutex>
-#include <map>
+
+#include "Data.hpp"
 
 class Database
 {
@@ -29,27 +31,28 @@ private:
     std::map<std::string, std::string> m_query_results;
     bool m_query_results_available = false;
 
-    std::mutex m_query_lock;
-
 public:
     Database();
     ~Database();
 
-    Database(Database const&) = delete;
-    void operator=(Database const&) = delete;
+    Database(Database const &) = delete;
+    void operator=(Database const &) = delete;
 
-    std::string get_parking_by_ticket(const std::string& ticket);
+    void add_user(User data);
+    void add_ticket(Ticket data);
 
-    std::string get_ticket_by_license(const std::string& license);
+    User get_user(User data);
+    Ticket get_ticket(Ticket data);
 
-    void store_vehicle(const std::string& license, const std::string& ticket);
-    void store_parking(const std::string& license, const std::string& parking);
-    void remove_parking(const std::string& parking);
-    void destroy_ticket(const std::string& ticket);
-    std::map<std::string, std::string> query(const std::string& query);
+    void update_user(User data);
+    void update_ticket(Ticket data);
+
+    void destroy_ticket(Ticket data);
+
+    std::map<std::string, std::string> query(const std::string &query);
 
     int callback(void *NotUsed, int argc, char **argv, char **azColName);
-    static Database& getInstance()
+    static Database &get()
     {
         static Database instance;
         return instance;
