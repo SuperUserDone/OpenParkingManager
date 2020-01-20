@@ -63,6 +63,7 @@ Database::~Database() { sqlite3_close(m_db); }
 std::map<std::string, std::string> Database::query(const std::string &query)
 {
     std::cout << query << std::endl;
+    m_query_results.clear();
     char *zErrMsg = 0;
     int rc;
     rc = sqlite3_exec(m_db, query.c_str(), callback_c, 0, &zErrMsg);
@@ -93,8 +94,10 @@ void Database::add_ticket(Ticket data)
 {
     std::stringstream ss;
 
-    ss << "INSERT INTO 'Parking0' ('License', 'Ticket') VALUES "
-       << "('" << data.License << "', '" << data.Ticket << "');";
+    ss << "INSERT INTO 'Parking0' ('License', 'Ticket', 'Paid') VALUES "
+       << "('" << data.License << "', '" << data.Ticket << "',"
+       << "false"
+       << ");";
 
     query(ss.str());
 }
@@ -107,8 +110,11 @@ User Database::get_user(User data)
 
     if (data.Password == "")
     {
-        User error_user;
-        return error_user;
+        User temp;
+        temp.Email = "NULL";
+        temp.Password = "NULL";
+        temp.ID = "NULL";
+        return temp;
     }
 
     if (data.Email != "")
@@ -124,6 +130,15 @@ User Database::get_user(User data)
     ss << "Hash = '" << data.Password << "'";
 
     std::map<std::string, std::string> q_return = query(ss.str());
+
+    if (q_return.empty())
+    {
+        User temp;
+        temp.Email = "NULL";
+        temp.Password = "NULL";
+        temp.ID = "NULL";
+        return temp;
+    }
 
     User user_values;
 
@@ -166,11 +181,28 @@ Ticket Database::get_ticket(Ticket data)
 
     std::map<std::string, std::string> q_return = query(ss.str());
 
+    if (q_return.empty())
+    {
+        Ticket ticket_values;
+
+        ticket_values.License = "NULL";
+        ticket_values.Parking = "NULL";
+        ticket_values.Ticket = "NULL";
+        ticket_values.paid = false;
+
+        return ticket_values;
+    }
+
     Ticket ticket_values;
 
     ticket_values.License = q_return["License"];
     ticket_values.Parking = q_return["Parking"];
     ticket_values.Ticket = q_return["Ticket"];
+    if (q_return["Paid"] == "True")
+        ticket_values.paid = true;
+
+    if (q_return["Paid"] == "False")
+        ticket_values.paid = false;
 
     return ticket_values;
 }
@@ -191,6 +223,16 @@ void Database::update_user(User data)
     query(ss.str());
 }
 
-void Database::update_ticket(Ticket data) {}
+void Database::update_ticket(Ticket data)
+{
+    std::stringstream ss;
+
+    ss << "UPDATE 'Parking0' SET "
+       << "Ticket = '" << data.Ticket << "', "
+       << "License = '" << data.License << "', "
+       << "Paid = " << (data.paid ? "TRUE" : "FALSE") << ", "
+       << "Parking = '" << data.Parking << "'";
+    query(ss.str());
+}
 
 void Database::destroy_ticket(Ticket data) {}
