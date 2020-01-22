@@ -37,11 +37,11 @@ int Database::callback(void *NotUsed, int argc, char **argv, char **azColName)
 {
     for (int i = 0; i < argc; i++)
     {
-        printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+        // printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
         m_query_results[azColName[i]] = argv[i] ? argv[i] : "NULL";
     }
     m_query_results_available = true;
-    printf("\n");
+    // printf("\n");
     return 0;
 }
 
