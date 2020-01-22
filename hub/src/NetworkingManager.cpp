@@ -58,6 +58,9 @@ NetworkingManager::NetworkingManager()
 
     temp = std::bind(&NetworkingManager::user_add_ticket, this, _1, _2);
     m_server.Post(R"(/user/(\S+)/ticket/add/(\S+))", temp);
+
+    temp = std::bind(&NetworkingManager::user_get_tickets, this, _1, _2);
+    m_server.Post(R"(/user/(\S+)/ticket/get)", temp);
 }
 
 void NetworkingManager::start() { m_server.listen("0.0.0.0", 8080); }
@@ -134,6 +137,12 @@ void NetworkingManager::user_add_ticket(const httplib::Request &req,
 
     temp_user = m_db->get_user(temp_user);
 
+    for (std::string ticket_number : temp_user.Owns)
+    {
+        if (ticket_number == ticket)
+            return;
+    }
+
     temp_user.Owns.push_back(temp_ticket.Ticket);
 
     m_db->update_user(temp_user);
@@ -142,6 +151,38 @@ void NetworkingManager::user_add_ticket(const httplib::Request &req,
 void NetworkingManager::user_get_tickets(const httplib::Request &req,
                                          httplib::Response &res)
 {
+    std::string user = req.matches[1];
+    std::string password = req.get_file_value("password").content;
+
+    if (!auth(password, user))
+    {
+        res.status = 401;
+        return;
+    }
+
+    User temp_user;
+    temp_user.ID = user;
+    temp_user.Password = password;
+
+    temp_user = m_db->get_user(temp_user);
+
+    nlohmann::json json_back;
+
+    json_back["tickets"] = nlohmann::json::value_t::array;
+    for (std::string ticket_number : temp_user.Owns)
+    {
+        Ticket temp_ticket;
+        temp_ticket.Ticket = ticket_number;
+
+        temp_ticket = m_db->get_ticket(temp_ticket);
+
+        if (temp_ticket.Ticket == "NULL")
+            continue;
+
+        json_back["tickets"].push_back(temp_ticket);
+    }
+
+    res.set_content(json_back.dump(4), "text/json");
 }
 
 void NetworkingManager::user_pay_ticket(const httplib::Request &req,

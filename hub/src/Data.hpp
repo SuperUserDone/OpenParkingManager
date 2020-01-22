@@ -34,7 +34,7 @@ inline void to_json(nlohmann::json &j, const Ticket &t)
 {
     j = nlohmann::json{{"ticket", t.Ticket},
                        {"parking", t.Parking},
-                       {"ticket", t.Ticket},
+                       {"license", t.License},
                        {"paid", t.paid}};
 }
 
