@@ -198,10 +198,10 @@ Ticket Database::get_ticket(Ticket data)
     ticket_values.License = q_return["License"];
     ticket_values.Parking = q_return["Parking"];
     ticket_values.Ticket = q_return["Ticket"];
-    if (q_return["Paid"] == "True")
+    if (q_return["Paid"] == "1")
         ticket_values.paid = true;
 
-    if (q_return["Paid"] == "False")
+    if (q_return["Paid"] == "0")
         ticket_values.paid = false;
 
     return ticket_values;
@@ -231,7 +231,8 @@ void Database::update_ticket(Ticket data)
        << "Ticket = '" << data.Ticket << "', "
        << "License = '" << data.License << "', "
        << "Paid = " << (data.paid ? "TRUE" : "FALSE") << ", "
-       << "Parking = '" << data.Parking << "'";
+       << "Parking = '" << data.Parking << "' "
+       << "WHERE Ticket = '" << data.Ticket << "'";
     query(ss.str());
 }
 

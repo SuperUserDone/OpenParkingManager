@@ -61,6 +61,9 @@ NetworkingManager::NetworkingManager()
 
     temp = std::bind(&NetworkingManager::user_get_tickets, this, _1, _2);
     m_server.Post(R"(/user/(\S+)/ticket/get)", temp);
+
+    temp = std::bind(&NetworkingManager::user_pay_ticket, this, _1, _2);
+    m_server.Post(R"(/user/(\S+)/ticket/(\S+)/pay)", temp);
 }
 
 void NetworkingManager::start() { m_server.listen("0.0.0.0", 8080); }
@@ -188,6 +191,30 @@ void NetworkingManager::user_get_tickets(const httplib::Request &req,
 void NetworkingManager::user_pay_ticket(const httplib::Request &req,
                                         httplib::Response &res)
 {
+    std::string user = req.matches[1];
+    std::string ticket_number = req.matches[2];
+    std::string password = req.get_file_value("password").content;
+
+    if (!auth(password, user))
+    {
+        res.status = 401;
+        return;
+    }
+
+    Ticket temp_ticket;
+    temp_ticket.Ticket = ticket_number;
+
+    temp_ticket = m_db->get_ticket(temp_ticket);
+
+    if (temp_ticket.Ticket == "NULL")
+    {
+        res.status == 400;
+        return;
+    }
+
+    temp_ticket.paid = true;
+
+    m_db->update_ticket(temp_ticket);
 }
 
 void NetworkingManager::data_get_image(const httplib::Request &req,
