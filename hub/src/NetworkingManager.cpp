@@ -15,6 +15,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+#include <cmath>
 #include <functional>
 
 #include <ReadLicensePlates.hpp>
@@ -64,6 +65,9 @@ NetworkingManager::NetworkingManager()
 
     temp = std::bind(&NetworkingManager::user_pay_ticket, this, _1, _2);
     m_server.Post(R"(/user/(\S+)/ticket/(\S+)/pay)", temp);
+
+    temp = std::bind(&NetworkingManager::data_get_image, this, _1, _2);
+    m_server.Get(R"(/data/image/ticket/(\S+))", temp);
 }
 
 void NetworkingManager::start() { m_server.listen("0.0.0.0", 8080); }
@@ -208,7 +212,7 @@ void NetworkingManager::user_pay_ticket(const httplib::Request &req,
 
     if (temp_ticket.Ticket == "NULL")
     {
-        res.status == 400;
+        res.status = 400;
         return;
     }
 
@@ -220,20 +224,45 @@ void NetworkingManager::user_pay_ticket(const httplib::Request &req,
 void NetworkingManager::data_get_image(const httplib::Request &req,
                                        httplib::Response &res)
 {
+    Ticket temp_ticket;
+    temp_ticket.Ticket = req.matches[1];
+    temp_ticket = m_db->get_ticket(temp_ticket);
+
+    std::ifstream file("./data/" + temp_ticket.Ticket + "/" +
+                           temp_ticket.LastImg + "/capture.png",
+                       std::ios::binary);
+    file.unsetf(std::ios::skipws);
+    std::streampos fileSize;
+
+    file.seekg(0, std::ios::end);
+    fileSize = file.tellg();
+    file.seekg(0, std::ios::beg);
+
+    std::string data;
+    data.reserve(fileSize);
+
+    data.insert(data.begin(), std::istream_iterator<char>(file),
+                std::istream_iterator<char>());
+    file.close();
+
+    res.set_content(data, "image/png");
 }
 
 void NetworkingManager::node_store_parking(const httplib::Request &req,
                                            httplib::Response &res)
 {
+    res.status = 501;
 }
 
 void NetworkingManager::payment_get_parking(const httplib::Request &req,
                                             httplib::Response &res)
 {
+    res.status = 501;
 }
 void NetworkingManager::payment_pay_ticket(const httplib::Request &req,
                                            httplib::Response &res)
 {
+    res.status = 501;
 }
 
 NetworkingManager::~NetworkingManager() {}

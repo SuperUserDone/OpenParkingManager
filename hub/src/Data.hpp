@@ -27,6 +27,7 @@ struct Ticket
     std::string Ticket = "";
     std::string License = "";
     std::string Parking = "";
+    std::string LastImg = "";
     bool paid = false;
 };
 

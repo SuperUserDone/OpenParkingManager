@@ -94,9 +94,11 @@ void Database::add_ticket(Ticket data)
 {
     std::stringstream ss;
 
-    ss << "INSERT INTO 'Parking0' ('License', 'Ticket', 'Paid') VALUES "
+    ss << "INSERT INTO 'Parking0' ('License', 'Ticket', 'Paid', 'LastImg') "
+          "VALUES "
        << "('" << data.License << "', '" << data.Ticket << "',"
-       << "false"
+       << "false, "
+       << "entry"
        << ");";
 
     query(ss.str());
@@ -198,6 +200,8 @@ Ticket Database::get_ticket(Ticket data)
     ticket_values.License = q_return["License"];
     ticket_values.Parking = q_return["Parking"];
     ticket_values.Ticket = q_return["Ticket"];
+    ticket_values.LastImg = q_return["LastImg"];
+
     if (q_return["Paid"] == "1")
         ticket_values.paid = true;
 
@@ -231,7 +235,8 @@ void Database::update_ticket(Ticket data)
        << "Ticket = '" << data.Ticket << "', "
        << "License = '" << data.License << "', "
        << "Paid = " << (data.paid ? "TRUE" : "FALSE") << ", "
-       << "Parking = '" << data.Parking << "' "
+       << "Parking = '" << data.Parking << "', "
+       << "LastImg = '" << data.LastImg << "' "
        << "WHERE Ticket = '" << data.Ticket << "'";
     query(ss.str());
 }
