@@ -2,7 +2,10 @@
 ## AKA Findy Wheely Auto Mobily
 ### By the Dorkside
 # About
-This is the github page for the [FLL](http://www.firstlegoleague.org/) team The Dorkside's research project. The design and programming was done by Louis van der Walt, one of the team members.
+
+This project serves as the open source repository of OpenParking manager, Currently as Louis Van der Walt's Expo 2020.
+
+Originaly this was the github page for the [FLL](http://www.firstlegoleague.org/) team The Dorkside's research project. The design and programming was done by Louis van der Walt, one of the team members.
 
 ![](images/group_photo.jpg)
 
