@@ -1,6 +1,5 @@
 # Open Parking Manager
 ## AKA Findy Wheely Auto Mobily
-### By the Dorkside
 # About
 
 This project serves as the open source repository of OpenParking manager, Currently as Louis Van der Walt's Expo 2020.
