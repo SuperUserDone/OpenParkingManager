@@ -25,12 +25,6 @@ Some features we plan to implement:
 
 **Currently this project is not fit for use in a real world scenario.**
 
-# Compiling
-    TODO
-
-# Contributing
-    TODO
-
 # Licence
 
 All code is licensed under GPLv3, unless noted elsewhere. All technical drawings, documentation, schematics and images are licensed under CC-BY-SA, unless noted elsewhere.
@@ -55,6 +49,5 @@ OpenParkingManager - An open source parking manager and parking finder.
 ```
 This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/ or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 ```
-_Free as in freedom._
 
 ![](images/by-sa.svg)
